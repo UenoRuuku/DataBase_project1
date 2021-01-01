@@ -14,7 +14,7 @@ print("PROJECT_ROOT", ROOT_PATH)
 IP = ""
 DB_USER = ""
 DB_PASSWORD = ""
-DB_Name = ""
+DB_NAME = ""
 
 LOG_ROOT = ROOT_PATH + "\\static\\logs"
 LOG_LEVEL = logging.DEBUG
