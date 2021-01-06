@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 
 <head>
     <meta charset="UTF-8">
     <title>病院の管理システム</title>
 </head>
 <style>
+    html,
     body {
         margin: 0;
         padding: 0;
@@ -108,21 +109,34 @@
         0% {
             background: #F44336;
         }
+
         25% {
             background: #03a9f4;
         }
+
         50% {
             background: #9C27B0;
         }
+
         75% {
             background: #00FF0A;
         }
+
         100% {
             background: #F44336;
         }
     }
+    .form{
+        position: absolute;
+        top:50%;
+        left: 50%;
+        transform: translateX(-50%) translateY(-50%);
+    }
+    .but{
+        width: 50%;
+        Color:
+    }
 </style>
-
 <body>
     <section>
         <div class="bgPulse">
@@ -137,7 +151,19 @@
             <span></span>
         </div>
     </section>
-    <h2></h2>
+    <div class="form">
+        <h2>病院の管理システム</h2>
+        <h3>ログイン</h3>
+        <form>
+            <label>ユーザ名</label>
+            <input name="username" type="text">
+            <label>パスワード</label>
+            <input name="password" type="password">
+            <br>
+            <br>
+            <button class="but">ログイン/Press Enter</button>
+        </form>
+    </div>
 </body>
 
 </html>
