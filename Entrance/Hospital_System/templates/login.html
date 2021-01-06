@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="zh">
 
 <head>
     <meta charset="UTF-8">
@@ -105,26 +105,30 @@
         }
     }
 
-    @keyframes bgColor {
-        0% {
-            background: #F44336;
-        }
+<!--    @keyframes bgColor {-->
+<!--        0% {-->
+<!--            background: #F44336;-->
+<!--        }-->
 
-        25% {
-            background: #03a9f4;
-        }
+<!--        25% {-->
+<!--            background: #03a9f4;-->
+<!--        }-->
 
-        50% {
-            background: #9C27B0;
-        }
+<!--        50% {-->
+<!--            background: #9C27B0;-->
+<!--        }-->
 
-        75% {
-            background: #00FF0A;
-        }
+<!--        75% {-->
+<!--            background: #00FF0A;-->
+<!--        }-->
 
-        100% {
-            background: #F44336;
-        }
+<!--        100% {-->
+<!--            background: #F44336;-->
+<!--        }-->
+<!--    }-->
+
+    h2,h3,h4,label{
+        color:#FF9900;
     }
     .form{
         position: absolute;
@@ -136,34 +140,40 @@
         width: 50%;
         Color:
     }
-</style>
-<body>
-    <section>
-        <div class="bgPulse">
-            <span></span>
-            <span></span>
-            <span></span>
-            <span></span>
-            <span></span>
-            <span></span>
-            <span></span>
-            <span></span>
-            <span></span>
-        </div>
-    </section>
-    <div class="form">
-        <h2>病院の管理システム</h2>
-        <h3>ログイン</h3>
-        <form>
-            <label>ユーザ名</label>
-            <input name="username" type="text">
-            <label>パスワード</label>
-            <input name="password" type="password">
-            <br>
-            <br>
-            <button class="but">ログイン/Press Enter</button>
-        </form>
-    </div>
-</body>
 
+
+</style>
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/animate.css/3.2.0/animate.min.css">
+<body>
+<section>
+    <div class="bgPulse">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+</section>
+<div class="form animated fadeIn">
+    <h2>医院管理系统</h2>
+    <h3>登录</h3>
+    <form method="POST" action="/service/">
+        {% csrf_token %}
+        <label>用户名</label>
+        <input name="username" type="text">
+        <label>密码</label>
+        <input name="password" type="password">
+        <br>
+        <br style="display:{{dis}}">
+        <span class="animated flash"
+              style="color: red; width:50%; text-align:center;background-color:red; color:white; display:{{dis}}">用户名或密码错误</span>
+        <br>
+        <button class="but">登录/Press Enter</button>
+    </form>
+</div>
+</body>
 </html>

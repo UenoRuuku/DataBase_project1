@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 
 <head>
     <meta charset="UTF-8">
     <title>病院の管理システム</title>
 </head>
 <style>
+    html,
     body {
         margin: 0;
         padding: 0;
@@ -17,7 +18,7 @@
         height: 100vh;
         background: #000;
         overflow: hidden;
-        animation: bgColor 20s linear infinite;
+<!--        animation: bgColor 20s linear infinite;-->
     }
 
     .bgPulse {
@@ -104,40 +105,64 @@
         }
     }
 
-    @keyframes bgColor {
-        0% {
-            background: #F44336;
-        }
-        25% {
-            background: #03a9f4;
-        }
-        50% {
-            background: #9C27B0;
-        }
-        75% {
-            background: #00FF0A;
-        }
-        100% {
-            background: #F44336;
-        }
-    }
-</style>
+<!--    @keyframes bgColor {-->
+<!--        0% {-->
+<!--            background: #F44336;-->
+<!--        }-->
 
+<!--        25% {-->
+<!--            background: #03a9f4;-->
+<!--        }-->
+
+<!--        50% {-->
+<!--            background: #9C27B0;-->
+<!--        }-->
+
+<!--        75% {-->
+<!--            background: #00FF0A;-->
+<!--        }-->
+
+<!--        100% {-->
+<!--            background: #F44336;-->
+<!--        }-->
+<!--    }-->
+    .form{
+        position: absolute;
+        top:50%;
+        left: 50%;
+        transform: translateX(-50%) translateY(-50%);
+    }
+    .but{
+        width: 50%;
+        Color:
+    }
+    .form{
+        position: absolute;
+        top:50%;
+        left: 50%;
+        transform: translateX(-50%) translateY(-50%);
+        color:#FF9900;
+    }
+
+</style>
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/animate.css/3.2.0/animate.min.css">
 <body>
-    <section>
-        <div class="bgPulse">
-            <span></span>
-            <span></span>
-            <span></span>
-            <span></span>
-            <span></span>
-            <span></span>
-            <span></span>
-            <span></span>
-            <span></span>
-        </div>
-    </section>
-    <h2></h2>
+<section>
+    <div class="bgPulse">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+</section>
+<div class="form animated fadeIn">
+    <h2>登录为{{msg}}</h2>
+</div>
 </body>
 
 </html>
