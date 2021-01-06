@@ -43,6 +43,13 @@ create table sickbed
     primary key (b_id)
 );
 
+create table ward_nurse_sickbed
+(
+    b_id int,
+    u_id int,
+    primary key (b_id)
+);
+
 create table ward_sickbed
 (
     w_id int,
