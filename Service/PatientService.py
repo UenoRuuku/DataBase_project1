@@ -16,8 +16,9 @@ def add_patient(name, result, time, illness_level, info='无'):
     :param info: 病人的其他基本信息，默认为 '无'
     :type info: 字符串，不长于100字符
     """
-    # 如果没有对应病情等级的空闲病房，将病人的 transfer 属性设置为 1 表示病人处于隔离区
-    # 如果存在对应病情等级的空闲病房，将病人的 transfer 属性设置为 0 并且更新对应的 sickbed 和 sickbed_patient 表中的内容
+    # 如果没有空闲护士或者对应病情等级的空闲病房，将病人的 transfer 属性设置为 1 表示病人处于隔离区
+    # 如果存在空闲护士或者对应病情等级的空闲病房，将病人的 transfer 属性设置为 0
+    #       并且更新对应的 sickbed_ward_nurse, sickbed 和 sickbed_patient 表中的内容
 
 
 def add_nat_report(result, time, illness_level, p_id):
@@ -32,8 +33,9 @@ def add_nat_report(result, time, illness_level, p_id):
     :type p_id: 整数
     """
     # 如果满足了出院条件，将病人的 transfer 属性设置为 -1
-    # 如果病情等级发生了变化，且没有新的病情等级的空闲病房，将病人的 transfer 属性设置为 1 表示病人待转移
-    # 如果病情等级发生了变化，且存在新的病情等级的空闲病房，更新对应的 sickbed 和 sickbed_patient 表中的内容
+    # 如果病情等级发生了变化，且没有新的病情等级的空闲护士或病房，将病人的 transfer 属性设置为 1 表示病人待转移
+    # 如果病情等级发生了变化，且存在新的病情等级的空闲护士和病房，
+    #       更新对应的 sickbed_ward_nurse, sickbed 和 sickbed_patient 表中的内容
 
 
 def record_patient_status(time, temperature, symptom, life_status, curr_report, p_id):

@@ -24,6 +24,13 @@ create table treatment_area
         on delete set null
 );
 
+create table ward_nurse_treatment_area
+(
+    u_id int,
+    ta_id int,
+    primary key (u_id)
+);
+
 create table ward
 (
     w_id int auto_increment,
@@ -40,21 +47,17 @@ create table sickbed
     b_id int auto_increment,
     bed_status int default 0 check (bed_status in
     (0, 1)),
-    primary key (b_id)
+    w_id int not null,
+    primary key (b_id),
+    foreign key (w_id) references ward (w_id)
+        on delete cascade
 );
 
-create table ward_nurse_sickbed
+create table sickbed_ward_nurse
 (
     b_id int,
     u_id int,
     primary key (b_id)
-);
-
-create table ward_sickbed
-(
-    w_id int,
-    b_id int,
-    primary key (w_id, b_id)
 );
 
 create table patient
@@ -62,9 +65,9 @@ create table patient
     p_id int auto_increment,
     name varchar (20),
     info varchar (100),
-    -- -1：可以出院  0：处于病房  1：处于隔离区或者病情评级与治疗区域不符
+    -- -2：已经出院  -1：可以出院  0：处于病房  1：处于隔离区或者病情评级与治疗区域不符
     transfer int check (transfer in
-    (-1, 0, 1)),
+    (-2, -1, 0, 1)),
     primary key (p_id)
 );
 
