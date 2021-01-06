@@ -65,9 +65,9 @@ create table patient
     p_id int auto_increment,
     name varchar (20),
     info varchar (100),
-    -- -2：已经出院  -1：可以出院  0：处于病房  1：处于隔离区或者病情评级与治疗区域不符
+    -- -1：可以出院  0：处于病房  1：处于隔离区或者病情评级与治疗区域不符
     transfer int check (transfer in
-    (-2, -1, 0, 1)),
+    (-1, 0, 1)),
     primary key (p_id)
 );
 
