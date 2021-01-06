@@ -38,12 +38,12 @@ def check_user(request):
                 request.session['username'] = username
                 # 获取权限
                 request.session['auth'] = 0
-                print(password)
-                return render(request, "service.html", context={
+                context = {
                     'code': 1,
                     'msg': 'login success',
-                    'wait': 3
-                })
+                    'wait': 3,
+                }
+                return render(request, "service.html", context=context)
             else:
                 return render(request, "login.html", context={
                     'code': 2,
