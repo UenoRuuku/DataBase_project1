@@ -1,5 +1,5 @@
 from connector.connectMysql import db
-from Service.UserService import insert_user
+from Service.BaseService import insert_user
 from util import config
 import pymysql
 

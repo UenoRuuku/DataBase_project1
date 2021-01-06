@@ -1,4 +1,5 @@
 from connector.connectMysql import db
+from Service.BaseService import check_patient_discharge
 
 cursor = db.cursor()
 
@@ -19,3 +20,10 @@ def record_patient_status(time, temperature, symptom, life_status, curr_report, 
     :type p_id: 整数
     """
     # 如果满足了出院条件，将病人的 transfer 属性设置为 -1
+
+    cursor.execute("insert into patient_status (time, temperature, symptom, life_status, curr_report, p_id) "
+                   "values ('%s', %.1f, '%s', '%s', %d, %d)"
+                   % (time, temperature, symptom, life_status, curr_report, p_id))
+    if check_patient_discharge():
+        cursor.execute("update patient set transfer=-1 where p_id=%d" % p_id)
+    db.commit()
