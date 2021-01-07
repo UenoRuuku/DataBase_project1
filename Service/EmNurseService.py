@@ -1,4 +1,3 @@
-from connector.connectMysql import db
 from Service.BaseService import *
 
 cursor = db.cursor()

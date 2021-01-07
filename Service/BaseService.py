@@ -89,3 +89,19 @@ def check_patient_discharge(p_id):
         return False
     else:
         return True
+
+
+def transfer_patient(illness_level):
+    """
+    声明有病人需要转入 illness_level 下的治疗区域，或该区域出现了空闲资源，将所有待转入对应区域的病人转入
+    :param illness_level: 有病人要转入的或出现了空闲资源的治疗区域对应的病情等级
+    """
+    # 找到所有病情等级为 illness_level 的待转移的病人
+    patient_to_transfer = []
+    cursor.execute("select p_id from patient natural join nat_report "
+                   "where transfer=1 and illness_level='%s'" % illness_level)
+    result = cursor.fetchall()
+    for item in result:
+        patient_to_transfer.append(item[0])
+
+    # 优先选择隔离区（没有病床）的病人
