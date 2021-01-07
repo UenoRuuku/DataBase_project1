@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="zh">
 
 <head>
     <meta charset="UTF-8">
@@ -18,7 +18,6 @@
         height: 100vh;
         background: #000;
         overflow: hidden;
-<!--        animation: bgColor 20s linear infinite;-->
     }
 
     .bgPulse {
@@ -105,69 +104,265 @@
         }
     }
 
-<!--    @keyframes bgColor {-->
-<!--        0% {-->
-<!--            background: #F44336;-->
-<!--        }-->
-
-<!--        25% {-->
-<!--            background: #03a9f4;-->
-<!--        }-->
-
-<!--        50% {-->
-<!--            background: #9C27B0;-->
-<!--        }-->
-
-<!--        75% {-->
-<!--            background: #00FF0A;-->
-<!--        }-->
-
-<!--        100% {-->
-<!--            background: #F44336;-->
-<!--        }-->
-<!--    }-->
-    .form{
-        position: absolute;
-        top:50%;
-        left: 50%;
-        transform: translateX(-50%) translateY(-50%);
-    }
-    .but{
+    .but {
         width: 50%;
-        Color:
+        /* Color: */
     }
-    .form{
+
+    h3,
+    span {
+        color: white;
+    }
+
+    .nav {
+        position: fixed;
+        top: 5%;
+        left: 5%;
+    }
+
+    .think {
+        animation-delay: 0.6s;
+    }
+
+    .main-container {
+        position: fixed;
+        top: 10%;
+        background: rgba(192, 192, 192, 0.7);
+        left: 30%;
+        height: 80%;
+        width: 40%;
+    }
+
+    .delay-1 {
+        animation-delay: 1.2s;
+    }
+
+    .button-combine {
+        animation-delay: 1.2s;
+    }
+
+    .btn {
+        background: none;
+        border: 4px solid;
+        padding: 12px 24px;
+        position: relative;
+        font-size: 24px;
+        color: white;
+        transition: 0.25s;
+        cursor: pointer;
+    }
+
+    .btn:hover {
+        background: white;
+        color: black;
+    }
+
+    .btn::before,
+    .btn::after {
+        content: "";
         position: absolute;
-        top:50%;
-        left: 50%;
-        transform: translateX(-50%) translateY(-50%);
-        color:#FF9900;
+        background-color: black;
+        width: 12px;
+        height: 4px;
+        transform: skew(-30deg);
+        transition: 0.25s
     }
-    h3{
-        color:#FF9900;
+
+    .btn:hover::before,
+    .btn:hover::after {
+        background-color: white;
+    }
+
+    .btn::before {
+        top: -4px;
+        left: 20%;
+    }
+
+    .btn::after {
+        bottom: -4px;
+        right: 20%;
+    }
+
+    .btn:hover::before {
+        top: -4px;
+        left: 80%;
+    }
+
+    .btn:hover::after {
+        bottom: -4px;
+        right: 80%;
+    }
+
+    .dis {
+        display: none;
+    }
+
+    table {
+        border-collapse: collapse;
+        border-spacing: 0;
+    }
+
+    td,
+    th {
+        padding: 0;
+    }
+
+    .pure-table {
+        border-collapse: collapse;
+        border-spacing: 0;
+        empty-cells: show;
+        border: 1px solid #cbcbcb;
+        margin: 0 auto;
+    }
+
+    .pure-table caption {
+        color: #000;
+        font: italic 85%/1 arial, sans-serif;
+        padding: 1em 0;
+        text-align: center;
+    }
+
+    .pure-table td,
+    .pure-table th {
+        border-left: 1px solid #cbcbcb;
+        border-width: 0 0 0 1px;
+        font-size: inherit;
+        margin: 0;
+        overflow: visible;
+        padding: .5em 1em;
+    }
+
+    .pure-table thead {
+        background-color: #e0e0e0;
+        color: #000;
+        text-align: left;
+        vertical-align: bottom;
+    }
+
+    .pure-table td {
+        background-color: transparent;
     }
 </style>
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/animate.css/3.2.0/animate.min.css">
-<body>
-<section>
-    <div class="bgPulse">
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-    </div>
-</section>
-<div class="nav">
-    <h3>欢迎，{{name}}{{auth}}</h3>
-</div>
-<div class="form animated fadeIn">
+<script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.js">
+</script>
 
-</div>
+<body>
+    <section>
+        <div class="bgPulse">
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </section>
+    <div class="nav">
+        <h3 class="animated fadeIn">欢迎，{{name}}主治医生</h3>
+        <span class="animated fadeIn think">我想，您可以……</span>
+        <br>
+        <br>
+        <div class="animated fadeIn button-combine">
+            <button class="btn" onclick="changeTo('patient')">查看病人信息</button>
+            <br>
+            <br>
+            <button class="btn" onclick="changeTo('nurse')">查看护士信息</button>
+            <br>
+            <br>
+            <button class="btn" onclick="changeTo('index')">待处理信息</button>
+        </div>
+    </div>
+    <div class="animated fadeIn main-container active delay-1" id="index">
+        <h2 style="margin-left:20px;margin-top:10px;">待处理消息</h2>
+        <table class="pure-table">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">病人ID</th>
+                    <th scope="col">病人姓名</th>
+                    <th scope="col">状态</th>
+                    <th scope="col">操作</th>
+                </tr>
+            </thead>
+            <tbody id="msg">
+
+            </tbody>
+        </table>
+    </div>
+    <div class="dis" id="patient"></div>
+    <div class="dis" id="nurse"></div>
+    </div>
 </body>
+<script>
+    window.onload = function () {
+        var result = null;
+        var d = { "code": 1, csrfmiddlewaretoken: '{{ csrf_token }}' }
+        $.ajax({
+            type: "POST",
+            url: "/doctor/",
+            data: d,
+            success: function (data) {
+                result = JSON.parse(data);
+                result = JSON.parse(result);
+            }
+        }).then(
+            function () {
+                console.log(typeof (result) + "result:" + result)
+
+                // if (result.data != []) {
+                console.log(result.data)
+
+                $.each(result.data, function (n, data) {
+                    $("#msg").append("<tr id='patient" + data.id + "''>");
+                    $("#msg").append("<td>" + data.id + "</td>");
+                    $("#msg").append("<td>" + data.name + "</td>");
+                    $("#msg").append("<td>" + data.status + "</td>");
+                    operation = "<a onclick='deHos(" + data.id + ")'>出院</a>"
+                    $("#msg").append("<td id='patientOp" + data.id + "'>" + operation + "</td>");
+                    $("#msg").append("</tr>");
+                })
+
+            }
+            // }
+        )
+    };
+
+    function deHos(id) {
+        var data = {
+            code: 5,
+            id: id
+        }
+        $("#patientOp" + id).html("操作中……")
+        query(data).then(
+            function () {
+                $("#patient" + id).remove();
+            }
+        )
+    }
+
+    function query(d) {
+        ret = ""
+        $.ajax({
+            type: "POST",
+            url: "/doctor/",
+            data: d,
+            success: function (data) {
+                ret = data;
+                return ret;
+            }
+        })
+    }
+
+    var timer = null;
+
+    function changeTo(tar) {
+        var aim = $(".active")
+        aim.attr("class", "animated fadeOut main-container")
+        $("#" + tar).attr("class", "animated fadeIn main-container active")
+    }
+</script>
 
 </html>

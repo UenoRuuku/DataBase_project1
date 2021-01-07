@@ -13,8 +13,9 @@ ROOT_PATH = curPath[:curPath.find(PROJECT_NAME + "\\") + len(PROJECT_NAME + "\\"
 print("PROJECT_ROOT", ROOT_PATH)
 IP = "127.0.0.1"
 DB_USER = "root"
-DB_PASSWORD = "cc111111"
+DB_PASSWORD = "991221wzl"
 DB_NAME = "hospital"
 
-LOG_ROOT = ROOT_PATH + "\\static\\logs"
+LOG_ROOT = ROOT_PATH + "/static/logs/database.log"
 LOG_LEVEL = logging.DEBUG
+LOG_NAME = "database"

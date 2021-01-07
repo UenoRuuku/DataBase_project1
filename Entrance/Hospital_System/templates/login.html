@@ -127,19 +127,63 @@
 <!--        }-->
 <!--    }-->
 
-    h2,h3,h4,label{
+    h3,h4,label{
         color:#FF9900;
     }
     .form{
         position: absolute;
         top:50%;
         left: 50%;
+        width:50%;
         transform: translateX(-50%) translateY(-50%);
     }
-    .but{
-        width: 50%;
-        Color:
+    .form h2{
+    color:white;
+    text-align:center;
+    width:100%
     }
+    .box{
+        border: 0;
+        background: none;
+        display:block;
+        margin:20px auto;
+        text-align: center;
+        border:2px solid #3498db;
+        padding: 14px 10px;
+        width: 50%;
+        outline:none;
+        color:white;
+        border-radius: 24px;
+        transition:0.25s;
+        animation-delay:0.5s;
+    }
+
+    .box:focus,.box:hover{
+    width: 55%;
+    border-color: #2ecc71;
+    }
+
+    .but{
+    border: 0;
+        background: none;
+        display:block;
+        margin:20px auto;
+        text-align: center;
+        border:2px solid #3498db;
+        padding: 14px 10px;
+        width: 50%;
+        outline:none;
+        color:white;
+        border-radius: 24px;
+        transition:0.25s;
+        cursor:pointer;
+        animation-delay:1s;
+    }
+    .but:hover{
+    background: #2ecc71;
+    color:black;
+    }
+
 
 
 </style>
@@ -159,20 +203,14 @@
     </div>
 </section>
 <div class="form animated fadeIn">
-    <h2>医院管理系统</h2>
-    <h3>登录</h3>
+    <h2 class=" animated fadeIn">医院管理系统</h2>
+    <br>
     <form method="POST" action="/service/">
         {% csrf_token %}
-        <label>用户名</label>
-        <input name="username" type="text">
-        <label>密码</label>
-        <input name="password" type="password">
+        <input class="box animated fadeIn" name="username" placeholder="username" type="text">
+        <input class="box animated fadeIn" name="password" placeholder="password" type="password">
         <br>
-        <br style="display:{{dis}}">
-        <span class="animated flash"
-              style="color: red; width:50%; text-align:center;background-color:red; color:white; display:{{dis}}">用户名或密码错误</span>
-        <br>
-        <button class="but">登录/Press Enter</button>
+        <button class="but animated fadeIn">登录/Press Enter</button>
     </form>
 </div>
 </body>

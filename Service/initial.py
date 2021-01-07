@@ -1,6 +1,7 @@
 from connector.connectMysql import db
 from Service.BaseService import insert_user
 from util import config
+from util import logger
 import pymysql
 
 treatment_area = ['轻症治疗区域', '重症治疗区域', '危重症治疗区域']
@@ -8,6 +9,10 @@ init_ward_number = [5, 5, 3]
 init_ward_nurse_per_area = [3, 2, 2]
 sickbed_per_ward = [4, 2, 1]
 
+log = logger.create_logger(config.LOG_LEVEL, config.LOG_ROOT, config.LOG_NAME)
+
+log.info("----------------------------")
+log.info("start initializing.")
 database = pymysql.connect(config.IP, config.DB_USER, config.DB_PASSWORD)
 cursor = database.cursor()
 cursor.execute("drop database if exists %s" % config.DB_NAME)
@@ -15,6 +20,7 @@ cursor.execute("create database %s" % config.DB_NAME)
 database.commit()
 database.close()
 
+log.info("read sql")
 cursor = db.cursor()
 sql_file = open("../static/Hospital.sql", "r+", encoding="utf-8")
 all_sql = sql_file.read().split(";")
@@ -31,8 +37,11 @@ for sql in all_sql:
     if sql.strip() != '':
         cursor.execute(sql)
 db.commit()
+log.info("database hospital initialized successfully.")
 
+log.info("start insert data.")
 # 初始医院人员
+log.info("insert users.")
 insert_user('doctor1', '111', '万医生', 'doctor')
 insert_user('doctor2', '222', '兔医生', 'doctor')
 insert_user('doctor3', '333', '岁医生', 'doctor')
@@ -51,6 +60,7 @@ insert_user('em_nurse2', '222', '兔护士', 'em_nurse')
 insert_user('em_nurse3', '333', '岁护士', 'em_nurse')
 db.commit()
 
+log.info("insert treatment areas.")
 # 治疗区域简单的初始化
 ward_nurse_index = 6
 for i in range(len(treatment_area)):
@@ -63,6 +73,7 @@ for i in range(len(treatment_area)):
                        "(u_id, ta_id) values (%d, %d)" % (ward_nurse_index, i + 1))
 db.commit()
 
+log.info("insert sickbed and ward.")
 # 病房、病床简单的初始化
 ward_index = 0
 sickbed_index = 0
@@ -77,3 +88,5 @@ for i in range(len(treatment_area)):
                            "(0, %d)" % ward_index)
             sickbed_index += 1
 db.commit()
+log.info("finish inserting data.")
+log.info("----------------------------")

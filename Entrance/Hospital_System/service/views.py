@@ -15,7 +15,7 @@ def run_service(request):
 def check_user(request):
     print(request.method)
     logout(request)
-    if request.method == "GET":
+    if request.method == "GET" and "username" not in request.session:
         return render(request, "login.html", context={
             'code': 2,
             'msg': 'have to login',
@@ -42,6 +42,8 @@ def check_user(request):
                     'code': 1,
                     'msg': 'login success',
                     'wait': 3,
+                    'name': username,
+                    'auth': '主治医生'
                 }
                 return render(request, "service.html", context=context)
             else:
