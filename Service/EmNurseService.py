@@ -41,3 +41,95 @@ def add_patient(name, check_result, time, illness_level, info='无'):
         cursor.execute("insert into sickbed_patient values (%d, %d)" % (sickbed_id, p_id))
         db.commit()
         return 1
+
+
+def em_nurse_query_patient(area_type, query_type):
+    """
+    :param area_type: 指定的治疗区域，取值为 ‘轻症治疗区域’ ‘重症治疗区域’ 或 ‘危重症治疗区域’
+    :param query_type: -1：查询所有病人 0：隔离区的病人
+    1：’康复出院‘的病人 2：’在院治疗‘的病人 3：’病亡‘的病人
+    4：‘轻症’的病人 5：‘重症’的病人 6：‘危重症’的病人
+    :return: 满足筛选条件的所有病人的元组
+    """
+    info_to_query = []
+    if query_type < 1:
+        cursor.execute("select patient.p_id,patient.name "
+                       "from patient left join sickbed_patient on patient.p_id=sickbed_patient.p_id "
+                       "where transfer<>-1")
+        all_patient = cursor.fetchall()
+        if query_type == -1:
+            for item in all_patient:
+                cursor.execute("select area_type "
+                               "from treatment_area, ward natural join sickbed natural join sickbed_patient "
+                               "where ta_id=ward_area and p_id=%d" % item[0])
+                result = cursor.fetchall()
+                if len(result) != 0:
+                    info_to_query.append((item[0], item[1], result[0][0]))
+                else:
+                    cursor.execute("select life_status from patient_status "
+                                   "where p_id=%d order by time desc" % item[0])
+                    result = cursor.fetchall()
+                    if len(result) == 0 or result[0][0] == '在院治疗':
+                        info_to_query.append((item[0], item[1], '隔离区'))
+        elif query_type == 0:
+            for item in all_patient:
+                cursor.execute("select area_type "
+                               "from treatment_area, ward natural join sickbed natural join sickbed_patient "
+                               "where ta_id=ward_area and p_id=%d" % item[0])
+                result = cursor.fetchall()
+                if len(result) == 0:
+                    cursor.execute("select life_status from patient_status "
+                                   "where p_id=%d order by time desc" % item[0])
+                    result = cursor.fetchall()
+                    if len(result) == 0 or result[0][0] == '在院治疗':
+                        info_to_query.append((item[0], item[1], '隔离区'))
+    else:
+        cursor.execute("select p_id from sickbed_patient natural join sickbed natural join ward,"
+                       "treatment_area where ward_area=ta_id and area_type='%s'" % area_type)
+        all_patient = cursor.fetchall()
+        if query_type == 1:
+            for p_id in all_patient:
+                cursor.execute("select patient.p_id,name,life_status "
+                               "from patient left join patient_status on patient.p_id=patient_status.p_id "
+                               "where patient.p_id=%d order by time desc" % p_id)
+                result = cursor.fetchall()
+                if len(result) != 0 and result[0][2] == '康复出院':
+                    info_to_query.append(result[0])
+        elif query_type == 2:
+            for p_id in all_patient:
+                cursor.execute("select patient.p_id,name,life_status "
+                               "from patient left join patient_status on patient.p_id=patient_status.p_id "
+                               "where patient.p_id=%d order by time desc" % p_id)
+                result = cursor.fetchall()
+                if len(result) != 0 and result[0][2] == '在院治疗':
+                    info_to_query.append(result[0])
+        elif query_type == 3:
+            for p_id in all_patient:
+                cursor.execute("select patient.p_id,name,life_status "
+                               "from patient left join patient_status on patient.p_id=patient_status.p_id "
+                               "where patient.p_id=%d order by time desc" % p_id)
+                result = cursor.fetchall()
+                if len(result) != 0 and result[0][2] == '病亡':
+                    info_to_query.append(result[0])
+        elif query_type == 4:
+            for p_id in all_patient:
+                cursor.execute("select p_id,name,illness_level from patient natural join nat_report "
+                               "where p_id=%d order by time desc" % p_id)
+                result = cursor.fetchall()
+                if len(result) != 0 and result[0][2] == '轻症':
+                    info_to_query.append(result[0])
+        elif query_type == 5:
+            for p_id in all_patient:
+                cursor.execute("select p_id,name,illness_level from patient natural join nat_report "
+                               "where p_id=%d order by time desc" % p_id)
+                result = cursor.fetchall()
+                if len(result) != 0 and result[0][2] == '重症':
+                    info_to_query.append(result[0])
+        elif query_type == 6:
+            for p_id in all_patient:
+                cursor.execute("select p_id,name,illness_level from patient natural join nat_report "
+                               "where p_id=%d order by time desc" % p_id)
+                result = cursor.fetchall()
+                if len(result) != 0 and result[0][2] == '危重症':
+                    info_to_query.append(result[0])
+    return info_to_query

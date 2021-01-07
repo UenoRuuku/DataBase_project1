@@ -85,3 +85,129 @@ def delete_ward_nurse(u_id, delete_u_id):
         transfer_patient(area_type[:-4])
 
         return 1
+
+
+def nurse_master_query_patient(nurse_master_id, query_type):
+    """
+    :param nurse_master_id: 护士长的主键
+    :param query_type: -1：查询所有病人 0：’康复出院‘的病人 1：’在院治疗‘的病人 2：’病亡‘的病人
+    3：可出院的病人 4：不可出院的病人 5：待转入其他区域的病人 6：不需转入其他区域的病人
+    :return: 满足筛选条件的所有病人的元组
+    """
+    cursor.execute("select p_id from sickbed_patient natural join sickbed natural join ward,"
+                   "treatment_area where ward_area=ta_id and area_nurse_master=%d" % nurse_master_id)
+    all_patient = cursor.fetchall()
+    info_to_query = []
+    if query_type == -1:
+        for p_id in all_patient:
+            cursor.execute("select patient.p_id,name,life_status,transfer "
+                           "from patient left join patient_status on patient.p_id=patient_status.p_id "
+                           "where patient.p_id=%d order by time desc" % p_id)
+            result = cursor.fetchall()
+            if len(result) != 0:
+                info_to_query.append(result[0])
+    elif query_type == 0:
+        for p_id in all_patient:
+            cursor.execute("select patient.p_id,name,life_status "
+                           "from patient left join patient_status on patient.p_id=patient_status.p_id "
+                           "where patient.p_id=%d order by time desc" % p_id)
+            result = cursor.fetchall()
+            if len(result) != 0 and result[0][2] == '康复出院':
+                info_to_query.append(result[0])
+    elif query_type == 1:
+        for p_id in all_patient:
+            cursor.execute("select patient.p_id,name,life_status "
+                           "from patient left join patient_status on patient.p_id=patient_status.p_id "
+                           "where patient.p_id=%d order by time desc" % p_id)
+            result = cursor.fetchall()
+            if len(result) != 0 and result[0][2] == '在院治疗':
+                info_to_query.append(result[0])
+    elif query_type == 2:
+        for p_id in all_patient:
+            cursor.execute("select patient.p_id,name,life_status "
+                           "from patient left join patient_status on patient.p_id=patient_status.p_id "
+                           "where patient.p_id=%d order by time desc" % p_id)
+            result = cursor.fetchall()
+            if len(result) != 0 and result[0][2] == '病亡':
+                info_to_query.append(result[0])
+    elif query_type == 3:
+        for p_id in all_patient:
+            cursor.execute("select p_id,name,transfer from patient where p_id=%d and transfer=-1" % p_id)
+            result = cursor.fetchall()
+            if len(result) != 0:
+                info_to_query.append(result[0])
+    elif query_type == 4:
+        for p_id in all_patient:
+            cursor.execute("select p_id,name,transfer from patient where p_id=%d and transfer<>-1" % p_id)
+            result = cursor.fetchall()
+            if len(result) != 0:
+                info_to_query.append(result[0])
+    elif query_type == 5:
+        for p_id in all_patient:
+            cursor.execute("select p_id,name,transfer from patient where p_id=%d and transfer=1" % p_id)
+            result = cursor.fetchall()
+            if len(result) != 0:
+                info_to_query.append(result[0])
+    elif query_type == 6:
+        for p_id in all_patient:
+            cursor.execute("select p_id,name,transfer from patient where p_id=%d and transfer<>1" % p_id)
+            result = cursor.fetchall()
+            if len(result) != 0:
+                info_to_query.append(result[0])
+    return info_to_query
+
+
+def nurse_master_query_nurses(nurse_master_id):
+    """
+    :param nurse_master_id: 护士长的主键
+    :return: 护士长管理的区域的护士长和病房护士的信息
+    """
+    info_to_query = []
+    cursor.execute("select u_id,username,name,info,user_type "
+                   "from user natural join ward_nurse_treatment_area natural join treatment_area "
+                   "where area_nurse_master=%d" % nurse_master_id)
+    result = cursor.fetchall()
+    for item in result:
+        info_to_query.append(item)
+    return info_to_query
+
+
+def nurse_master_query_nurse_patient(ward_nurse_id):
+    """
+    :param ward_nurse_id: 需要查询的病房护士的主键
+    :return: 该病房护士照顾的所有病人的信息
+    """
+    info_to_query = []
+    cursor.execute("select p_id,name,info "
+                   "from patient natural join sickbed_patient natural join sickbed_ward_nurse "
+                   "where u_id=%d" % ward_nurse_id)
+    result = cursor.fetchall()
+    for item in result:
+        info_to_query.append(item)
+    return info_to_query
+
+
+def nurse_master_query_sickbed_and_patient(nurse_master_id):
+    """
+    :param nurse_master_id: 护士长的主键
+    :return: 护士长管理的区域的病床和病床上的病人的信息
+    """
+    info_to_query = []
+    sickbeds = []
+    cursor.execute("select b_id from sickbed natural join ward, treatment_area "
+                   "where ward_area=ta_id and area_nurse_master=%d" % nurse_master_id)
+    result = cursor.fetchall()
+    for item in result:
+        sickbeds.append(item[0])
+    for b_id in sickbeds:
+        cursor.execute("select b_id,bed_status from sickbed where b_id=%d" % b_id)
+        result = cursor.fetchall()
+        sickbed = result[0]
+        if sickbed[1] == 1:
+            cursor.execute("select p_id,name,info from sickbed_patient natural join patient "
+                           "where b_id=%d" % sickbed[0])
+            result = cursor.fetchall()
+            info_to_query.append((sickbed[0], sickbed[1], result[0][0], result[0][1], result[0][2]))
+        else:
+            info_to_query.append((sickbed[0], sickbed[1], None, None, None))
+    return info_to_query
