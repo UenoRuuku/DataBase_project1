@@ -24,6 +24,6 @@ def record_patient_status(time, temperature, symptom, life_status, curr_report, 
     cursor.execute("insert into patient_status (time, temperature, symptom, life_status, curr_report, p_id) "
                    "values ('%s', %.1f, '%s', '%s', %d, %d)"
                    % (time, temperature, symptom, life_status, curr_report, p_id))
-    if check_patient_discharge():
+    if check_patient_discharge(p_id):
         cursor.execute("update patient set transfer=-1 where p_id=%d" % p_id)
     db.commit()
