@@ -23,11 +23,13 @@ def add_nat_report(check_result, time, illness_level, p_id):
 
     if check_patient_discharge(p_id):
         cursor.execute("update patient set transfer=-1 where p_id=%d" % p_id)
-
-    cursor.execute("select illness_level from nat_report where p_id=%d order by time desc" % p_id)
-    result = cursor.fetchall()
-    if result[0][0] != result[1][0]:
-        transfer_patient(illness_level)
+    else:
+        cursor.execute("select illness_level from nat_report where p_id=%d order by time desc" % p_id)
+        result = cursor.fetchall()
+        if result[0][0] != result[1][0]:
+            cursor.execute("update patient set transfer=1 where p_id=%d" % p_id)
+            transfer_patient(illness_level)
+    db.commit()
     return 1
 
 
@@ -51,8 +53,10 @@ def update_nat_illness_level(illness_level, p_id):
 
         if check_patient_discharge(p_id):
             cursor.execute("update patient set transfer=-1 where p_id=%d" % p_id)
-
-        transfer_patient(illness_level)
+        else:
+            cursor.execute("update patient set transfer=1 where p_id=%d" % p_id)
+            transfer_patient(illness_level)
+    db.commit()
     return 1
 
 
@@ -64,21 +68,26 @@ def update_patient_life_status(life_status, p_id):
     :type p_id: 整数
     """
     # 更新 patient_status 表中对应 p_id 的且 time 是最新的那一条记录的 life_status
-    # 如果病人病亡，更新对应的 sickbed_ward_nurse, sickbed 和 sickbed_patient 表中的内容
+    # 如果病人病亡或康复出院，更新对应的 sickbed_ward_nurse, sickbed 和 sickbed_patient 表中的内容
+    # 之后触发 patient_transfer
     cursor.execute("select ps_id, life_status from patient_status where p_id=%d order by time desc" % p_id)
     result = cursor.fetchall()
     latest_status_id = result[0][0]
     latest_life_status = result[0][1]
-    if latest_life_status == '病亡':
+    if latest_life_status == '病亡' or latest_life_status == '康复出院' or life_status == latest_life_status:
         return 0
-    elif life_status != latest_life_status:
+    else:
         cursor.execute("update patient_status set life_status='%s' where ps_id=%d" % (life_status, latest_status_id))
-        if life_status == '病亡':
+        if life_status == '病亡' or life_status == '康复出院':
             cursor.execute("select b_id from sickbed_patient where p_id=%d" % p_id)
             result = cursor.fetchall()
             sickbed_id = result[0][0]
             cursor.execute("delete from sickbed_ward_nurse where b_id=%d" % sickbed_id)
             cursor.execute("update sickbed set bed_status=0 where b_id=%d" % sickbed_id)
             cursor.execute("delete from sickbed_patient where b_id=%d" % sickbed_id)
+
+            cursor.execute("select illness_level from nat_report where p_id=%d order by time desc" % p_id)
+            result = cursor.fetchall()
+            transfer_patient(result[0][0])
         db.commit()
         return 1

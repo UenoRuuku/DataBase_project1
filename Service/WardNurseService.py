@@ -23,7 +23,18 @@ def record_patient_status(time, temperature, symptom, life_status, curr_report, 
     cursor.execute("insert into patient_status (time, temperature, symptom, life_status, curr_report, p_id) "
                    "values ('%s', %.1f, '%s', '%s', %d, %d)"
                    % (time, temperature, symptom, life_status, curr_report, p_id))
-    if check_patient_discharge(p_id):
+    if life_status == '病亡':
+        cursor.execute("select b_id from sickbed_patient where p_id=%d" % p_id)
+        result = cursor.fetchall()
+        sickbed_id = result[0][0]
+        cursor.execute("delete from sickbed_ward_nurse where b_id=%d" % sickbed_id)
+        cursor.execute("update sickbed set bed_status=0 where b_id=%d" % sickbed_id)
+        cursor.execute("delete from sickbed_patient where b_id=%d" % sickbed_id)
+
+        cursor.execute("select illness_level from nat_report where p_id=%d order by time desc" % p_id)
+        result = cursor.fetchall()
+        transfer_patient(result[0][0])
+    elif check_patient_discharge(p_id):
         cursor.execute("update patient set transfer=-1 where p_id=%d" % p_id)
     db.commit()
     return 1
