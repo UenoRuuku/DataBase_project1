@@ -38,15 +38,9 @@ def add_patient(name, check_result, time, illness_level, info='无'):
         return 0
 
     # 寻找一个空闲病床
-    wards = []
-    for area in area_id:
-        cursor.execute("select w_id from ward where ward_area=%d" % area)
-        result = cursor.fetchall()
-        for w_id in result:
-            wards.append(w_id[0])
     sickbed_id = None
-    for ward in wards:
-        cursor.execute("select b_id, bed_status from sickbed where w_id=%d" % ward)
+    for area in area_id:
+        cursor.execute("select b_id, bed_status from ward natural join sickbed where ward_area=%d" % area)
         result = cursor.fetchall()
         for item in result:
             if item[1] == 0:
@@ -96,3 +90,4 @@ def add_patient(name, check_result, time, illness_level, info='无'):
     cursor.execute("update sickbed set bed_status=1 where b_id=%d" % sickbed_id)
     cursor.execute("insert into sickbed_patient values (%d, %d)" % (sickbed_id, p_id))
     db.commit()
+    return 1
