@@ -1,4 +1,4 @@
-from connector.connectMysql import db
+from Service.BaseService import *
 
 cursor = db.cursor()
 
@@ -22,12 +22,16 @@ def add_ward_nurse(u_id, username, password, name):
                    "('%s', '%s', '%s', '%s')" % (username, password, name, 'ward_nurse'))
     add_u_id = db.insert_id()
 
-    cursor.execute("select ta_id from treatment_area where area_nurse_master=%d" % u_id)
+    cursor.execute("select ta_id, area_type from treatment_area where area_nurse_master=%d" % u_id)
     result = cursor.fetchall()
     ta_id = result[0][0]
+    area_type = result[0][1]
 
     cursor.execute("insert into ward_nurse_treatment_area values (%d, %d)" % (add_u_id, ta_id))
     db.commit()
+
+    transfer_patient(area_type[:-4])
+
     return 1
 
 
@@ -50,12 +54,16 @@ def delete_ward_nurse(u_id, delete_u_id):
         return 0
 
     delete_permission = False
+    area_type = None
     for area in area_id:
         cursor.execute("select count(u_id) from ward_nurse_treatment_area "
                        "where ta_id=%d and u_id=%d" % (area, delete_u_id))
         result = cursor.fetchall()
         if result[0][0] > 0:
             delete_permission = True
+            cursor.execute("select area_type from treatment_area where ta_id=%d" % area)
+            result = cursor.fetchall()
+            area_type = result[0][0]
             break
 
     if not delete_permission:
@@ -63,6 +71,17 @@ def delete_ward_nurse(u_id, delete_u_id):
     else:
         cursor.execute("delete from user where u_id=%d" % delete_u_id)
         cursor.execute("delete from ward_nurse_treatment_area where u_id=%d" % delete_u_id)
+
+        # 查找被删除的病房护士正在照顾的所有病人并将其 transfer 属性设置为 1
+        cursor.execute("select p_id from sickbed_ward_nurse natural join sickbed_patient "
+                       "where u_id=%d" % delete_u_id)
+        result = cursor.fetchall()
+        for item in result:
+            cursor.execute("update patient set transfer=1 where p_id=%d" % item[0])
+
         cursor.execute("delete from sickbed_ward_nurse where u_id=%d" % delete_u_id)
         db.commit()
+
+        transfer_patient(area_type[:-4])
+
         return 1

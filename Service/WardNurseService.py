@@ -1,5 +1,4 @@
-from connector.connectMysql import db
-from Service.BaseService import check_patient_discharge
+from Service.BaseService import *
 
 cursor = db.cursor()
 
