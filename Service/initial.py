@@ -4,7 +4,7 @@ from util import config
 import pymysql
 
 treatment_area = ['轻症治疗区域', '重症治疗区域', '危重症治疗区域']
-init_ward_number = [2, 2, 2]
+init_ward_number = [5, 5, 3]
 init_ward_nurse_per_area = [3, 2, 2]
 sickbed_per_ward = [4, 2, 1]
 
@@ -69,8 +69,8 @@ sickbed_index = 0
 for i in range(len(treatment_area)):
     for j in range(init_ward_number[i]):
         cursor.execute("insert into ward "
-                       "(total_bed, available_bed, ward_area) values (%d, %d, %d)" %
-                       (sickbed_per_ward[i], sickbed_per_ward[i], i + 1))
+                       "(total_bed, ward_area) values (%d, %d)" %
+                       (sickbed_per_ward[i], i + 1))
         ward_index += 1
         for k in range(sickbed_per_ward[i]):
             cursor.execute("insert into sickbed (bed_status, w_id) values "

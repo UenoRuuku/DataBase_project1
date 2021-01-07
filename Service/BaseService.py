@@ -1,11 +1,56 @@
 from connector.connectMysql import db
 
 cursor = db.cursor()
+max_patient_per_nurse = {'轻症': 3, '重症': 2, '危重症': 1}
 
 
 def insert_user(username, password, name, user_type):
     cursor.execute("insert into user (username, password, name, user_type)"
                    " values ('%s', '%s', '%s', '%s')" % (username, password, name, user_type))
+
+
+def find_available_sickbed_and_nurse(illness_level):
+    # 寻找对应治疗区域
+    area_id = []
+    cursor.execute("select ta_id from treatment_area where area_type='%s'" % (illness_level + '治疗区域'))
+    result = cursor.fetchall()
+    for item in result:
+        area_id.append(item[0])
+    if len(area_id) == 0:
+        return 0, (0, 0)
+
+    # 寻找一个空闲病床
+    sickbed_id = None
+    for area in area_id:
+        cursor.execute("select b_id, bed_status from ward natural join sickbed where ward_area=%d" % area)
+        result = cursor.fetchall()
+        for item in result:
+            if item[1] == 0:
+                sickbed_id = item[0]
+                break
+        if sickbed_id is not None:
+            break
+    if sickbed_id is None:
+        return 0, (0, 0)
+
+    # 寻找一位空闲病房护士
+    nurses = []
+    for area in area_id:
+        cursor.execute("select u_id from ward_nurse_treatment_area where ta_id=%d" % area)
+        result = cursor.fetchall()
+        for u_id in result:
+            nurses.append(u_id[0])
+    nurse_id = None
+    for nurse in nurses:
+        cursor.execute("select count(*) from sickbed_ward_nurse where u_id=%d" % nurse)
+        result = cursor.fetchall()
+        if result[0][0] < max_patient_per_nurse[illness_level]:
+            nurse_id = nurse
+            break
+    if nurse_id is None:
+        return 0, (0, 0)
+    else:
+        return 1, (sickbed_id, nurse_id)
 
 
 def check_patient_discharge(p_id):

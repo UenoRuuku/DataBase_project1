@@ -35,7 +35,6 @@ create table ward
 (
     w_id int auto_increment,
     total_bed int,
-    available_bed int,
     ward_area int not null,
     primary key (w_id),
     foreign key (ward_area) references treatment_area (ta_id)
