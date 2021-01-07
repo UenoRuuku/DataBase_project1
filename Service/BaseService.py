@@ -111,7 +111,8 @@ def transfer_patient(illness_level):
         cursor.execute("select p_id from nat_report "
                        "where p_id=%d and illness_level='%s' order by time desc" % (item[0], illness_level))
         result = cursor.fetchall()
-        temp.append(result[0][0])
+        if len(result) != 0:
+            temp.append(result[0][0])
     for p_id in temp:
         cursor.execute("select life_status from patient_status "
                        "where p_id=%d order by time desc" % p_id)
@@ -144,69 +145,28 @@ def transfer_patient(illness_level):
     new_area = []
     for (p_id, old_bed_id) in have_bed:
         found, (bed_id, nurse_id) = find_available_sickbed_and_nurse(illness_level)
-        if found == 0:
-            if len(new_available_bed) == 0:
-                db.commit()
-                return
-            for new_bed in new_available_bed:
-                cursor.execute("select area_type from treatment_area natural join ward natural join sickbed "
-                               "where b_id=%d" % new_bed)
-                result = cursor.fetchall()
-                if result[0][0] not in new_area:
-                    new_area.append(result[0][0])
-            for area in new_area:
-                transfer(area[:-4])
-        else:
+        if found == 1:
+            cursor.execute("delete from sickbed_ward_nurse where b_id=%d" % old_bed_id)
+            cursor.execute("update sickbed set bed_status=0 where b_id=%d" % old_bed_id)
+            cursor.execute("delete from sickbed_patient where b_id=%d" % old_bed_id)
+
             cursor.execute("update patient set transfer=0 where p_id=%d" % p_id)
             cursor.execute("insert into sickbed_ward_nurse values (%d, %d)" % (bed_id, nurse_id))
             cursor.execute("update sickbed set bed_status=1 where b_id=%d" % bed_id)
             cursor.execute("insert into sickbed_patient values (%d, %d)" % (bed_id, p_id))
             new_available_bed.append(old_bed_id)
-
-
-def transfer(illness_level):
-    # 查看对应治疗区域中是否有需要转入的非隔离区病人
-    # 找到所有病情等级为 illness_level 的待转移的在院治疗病人
-    p_to_transfer = []
-    temp = []
-    cursor.execute("select p_id from patient where transfer=1")
-    patients_id = cursor.fetchall()
-    for item in patients_id:
-        cursor.execute("select p_id from nat_report "
-                       "where p_id=%d and illness_level='%s' order by time desc" % (item[0], illness_level))
-        result = cursor.fetchall()
-        temp.append(result[0][0])
-    for item in temp:
-        cursor.execute("select p_id from patient_status "
-                       "where p_id=%d and life_status='%s' order by time desc" % (item, '在院治疗'))
-        result = cursor.fetchall()
-        p_to_transfer.append(result[0][0])
-
-    patient_and_bed = []
-    for p_id in p_to_transfer:
-        cursor.execute("select b_id from sickbed_patient where p_id=%d" % p_id)
-        result = cursor.fetchall()
-        patient_and_bed.append((p_id, result[0][0]))
-
-    new_available_bed = []
-    new_area = []
-    for (p_id, old_bed_id) in patient_and_bed:
-        found, (bed_id, nurse_id) = find_available_sickbed_and_nurse(illness_level)
-        if found == 0:
-            if len(new_available_bed) == 0:
-                db.commit()
-                return
-            for new_bed in new_available_bed:
-                cursor.execute("select area_type from treatment_area natural join ward natural join sickbed "
-                               "where b_id=%d" % new_bed)
-                result = cursor.fetchall()
-                if result[0][0] not in new_area:
-                    new_area.append(result[0][0])
-            for area in new_area:
-                transfer(area[:-4])
         else:
-            cursor.execute("update patient set transfer=0 where p_id=%d" % p_id)
-            cursor.execute("insert into sickbed_ward_nurse values (%d, %d)" % (bed_id, nurse_id))
-            cursor.execute("update sickbed set bed_status=1 where b_id=%d" % bed_id)
-            cursor.execute("insert into sickbed_patient values (%d, %d)" % (bed_id, p_id))
-            new_available_bed.append(old_bed_id)
+            break
+
+    if len(new_available_bed) == 0:
+        db.commit()
+        return
+    for new_bed in new_available_bed:
+        cursor.execute("select ward_area from ward natural join sickbed where b_id=%d" % new_bed)
+        result = cursor.fetchall()
+        cursor.execute("select area_type from treatment_area where ta_id=%d" % result[0][0])
+        result = cursor.fetchall()
+        if len(result) != 0 and (result[0][0] not in new_area):
+            new_area.append(result[0][0])
+    for area in new_area:
+        transfer_patient(area[:-4])

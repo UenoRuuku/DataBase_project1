@@ -46,6 +46,8 @@ def update_nat_illness_level(illness_level, p_id):
     # 如果存在新的病情等级的空闲护士和病房，更新对应的 sickbed_ward_nurse, sickbed 和 sickbed_patient 表中的内容
     cursor.execute("select r_id, illness_level from nat_report where p_id=%d order by time desc" % p_id)
     result = cursor.fetchall()
+    if len(result) == 0:
+        return 0
     latest_report_id = result[0][0]
     latest_illness_level = result[0][1]
     if illness_level != latest_illness_level:
@@ -72,6 +74,8 @@ def update_patient_life_status(life_status, p_id):
     # 之后触发 patient_transfer
     cursor.execute("select ps_id, life_status from patient_status where p_id=%d order by time desc" % p_id)
     result = cursor.fetchall()
+    if len(result) == 0:
+        return 0
     latest_status_id = result[0][0]
     latest_life_status = result[0][1]
     if latest_life_status == '病亡' or latest_life_status == '康复出院' or life_status == latest_life_status:
