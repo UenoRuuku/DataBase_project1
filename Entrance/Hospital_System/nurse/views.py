@@ -1,3 +1,6 @@
+from django.shortcuts import render
+
+# Create your views here.
 import inspect
 import json
 import os
@@ -21,34 +24,25 @@ log = logger.create_logger(config.LOG_LEVEL, config.LOG_ROOT, config.LOG_NAME)
 
 def unpack(request):
     code = int(request.POST.get("code"))
-    id = request.session["id"]
     print(code)
     log.info(str(request.session["username"]) + str(request.session["auth"]) + "访问了数据库")
     back_dic = ""
     if code == 1:
-        back_dic = getPatientOut(id)
+        back_dic = getPatientOut()
     elif code == 2:
-        back_dic = getAllPatient(id)
+        back_dic = getAllPatient()
     elif code == 3:
-        back_dic = getAllNurse(id)
+        back_dic = getAllNurse()
     elif code == 4:
-        choose = int(request.POST.get("param")["choose"])
-        back_dic = getExPatient(choose, id)
+        back_dic = getExPatient()
     elif code == 5:
-        back_dic = patientOut(id)
+        back_dic = patientOut()
     elif code == 6:
-        back_dic = moreOperation(id)
-    elif code == 7:
-        nurse = int(request.POST.get("param[nurse]"))
-        back_dic = getPatientByNurse(nurse)
-    elif code == 8:
-        die = int(request.POST.get("param")["id"])
-        back_dic = patientDie(die, id)
-
+        back_dic = moreOperation()
     return HttpResponse(json.dumps(back_dic))
 
 
-def getPatientOut(id):
+def getPatientOut():
     log.info("获取所有可以出院的病人")
     back_dic = {
         "code": "1",
@@ -65,76 +59,59 @@ def getPatientOut(id):
     return json.dumps(back_dic)
 
 
-def getAllPatient(id):
+def getAllPatient():
+    log.info("获取当前治疗区域的病人信息")
+    back_dic = {
+        "code": "1",
+        "msg": "success",
+        "data": [
+            {
+                "id": "1",
+                "name": "sb",
+                "status": "可出院"
+            }
+        ]
+    }
+    print(json.dumps(back_dic))
+    return json.dumps(back_dic)
+
+
+def getAllNurse():
+    log.info("获取当前治疗区域的病房护士信息")
+    back_dic = {
+        "code": "1",
+        "msg": "success",
+        "data": [
+            {
+                "id": "1",
+                "name": "sb",
+                "status": "可出院"
+            }
+        ]
+    }
+    print(json.dumps(back_dic))
+    return json.dumps(back_dic)
+
+
+def getExPatient():
+    log.info("获取病房护士负责的病人信息")
+    back_dic = {
+        "code": "1",
+        "msg": "success",
+        "data": [
+            {
+                "id": "1",
+                "name": "sb",
+                "status": "可出院"
+            }
+        ]
+    }
+    print(json.dumps(back_dic))
+    return json.dumps(back_dic)
+
+
+def patientOut():
     log.info("获取所有可以出院的病人")
-    back_dic = {
-        "code": "1",
-        "msg": "success",
-        "data": [
-            {
-                "id": "1",
-                "name": "sb",
-                "status": "可出院"
-            }
-        ]
-    }
-    print(json.dumps(back_dic))
-    return json.dumps(back_dic)
-
-
-def getAllNurse(id):
-    log.info("获取所有护士和护士长")
-    back_dic = {
-        "code": "1",
-        "msg": "success",
-        "data": [
-            {
-                "id": "1",
-                "name": "sb",
-                "auth": 0
-            }
-        ]
-    }
-    print(json.dumps(back_dic))
-    return json.dumps(back_dic)
-
-
-def getExPatient(choose, id):
-    log.info("按照筛选条件搜索病人的病人")
-    back_dic = {
-        "code": "1",
-        "msg": "success",
-        "data": [
-            {
-                "id": "1",
-                "name": "sb",
-                "status": "可出院"
-            }
-        ]
-    }
-    print(json.dumps(back_dic))
-    return json.dumps(back_dic)
-
-
-def patientOut(pid, id):
-    log.info("使" + str(pid) + "病人出院")
-    back_dic = {
-        "code": "1",
-        "msg": "success",
-        "data": [
-            {
-                "id": "1",
-                "name": "sb",
-                "status": "可出院"
-            }
-        ]
-    }
-    print(json.dumps(back_dic))
-    return json.dumps(back_dic)
-
-
-def patientDie(die, id):
-    log.info("使" + str(die) + "病人死亡")
     back_dic = {
         "code": "1",
         "msg": "success",
@@ -151,7 +128,7 @@ def patientDie(die, id):
 
 
 def moreOperation():
-    log.info("获取所有可以出院的病人")
+    log.info("修改该区域病房护士信息")
     back_dic = {
         "code": "1",
         "msg": "success",
@@ -164,20 +141,4 @@ def moreOperation():
         ]
     }
     print(json.dumps(back_dic))
-    return json.dumps(back_dic)
-
-
-def getPatientByNurse(nurse):
-    log.info("获取" + str(nurse) + "负责的病人")
-    back_dic = {
-        "code": "1",
-        "msg": "success",
-        "data": [
-            {
-                "id": "1",
-                "name": "sb",
-                "status": "可出院"
-            }
-        ]
-    }
     return json.dumps(back_dic)
