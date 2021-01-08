@@ -321,7 +321,7 @@
             </tbody>
         </table>
     </div>
-    <div class="dis">
+    <div class="dis" id="convertStatus">
         <h2 style="margin-left:20px;margin-top:10px;">病人信息更新</h2>
         <table class="pure-table">
             <tbody>
@@ -334,11 +334,11 @@
                     <td id="pname"></td>
                 </tr>
                 <tr>
-                    <td>上次体温</td>
-                    <td id="ptemp"></td>
+                    <td>登记时间</td>
+                    <td id="ptime"></td>
                 </tr>
                 <tr>
-                    <td>生命状态</td>
+                    <td>病情评级</td>
                     <td id="plive"></td>
                 </tr>
                 <tr>
@@ -347,23 +347,25 @@
                 </tr>
             </tbody>
         </table>
-        <div style=" margin: 0 auto;">
-            <form>
-                <label>今日体温</label>
-                <input name="temp">
-                <br>
-                <label>当前症状</label>
-                <input name="sympton">
-                <br>
-                <label>生命状态</label>
-                <input name="liveStatus">
-                <br>
-                <label>核酸检测结果</label>
-                <input name="nat">
-                <br>
-                <button id="pSubmit" type="button" onclick="submitConvert()">提交</button>
-            </form>
-        </div>
+        <br>
+        <br>
+        <form style="display:block; margin: 0 auto;width: fit-content;">
+            <label>今日体温</label>
+            <input name="temp">
+            <br>
+            <label>当前症状</label>
+            <input name="sympton">
+            <br>
+            <label>生命状态</label>
+            <input name="liveStatus" type="radio" value="0">在院治疗
+            <input name="liveStatus" type="radio" value="1">病亡
+            <br>
+            <br>
+            <button id="pSubmit" type="button" onclick="submitConvert()">提交</button>
+        </form>
+    </div>
+    <div style="position: fixed;bottom:5%;right:10%">
+        <button class="btn" onclick="logout()">登出</button>
     </div>
 </body>
 <script>
@@ -407,8 +409,7 @@
                     $("#msgPatient").append("<td>" + data.status + "</td>");
                     operation = "已逝"
                     if (data.life == 0) {
-                        operation = "<a class='a' onclick='convertStatus(" + data.id + ",\"" + data.name + "\")'>修改</a>" +
-                            "<a class='a' onclick='die(" + data.id + ")'>去世</a>"
+                        operation = "<a class='a' onclick='changeTo('convertStatus');convertStatus(" + data.id + ",\'" + data.name + "\')'>等级</a>"
                     }
                     $("#msgPatient").append("<td id='patientAllOp" + data.id + "'>" + operation + "</td>");
                     $("#msgPatient").append("</tr>");
@@ -418,27 +419,30 @@
     }
 
     function convertStatus(id, name) {
+        console.log("goo fuck your slef")
+        var result = null
         d = {
             "code": 3,
-            "param": {
-                "id": id
-            },
+            "pid": id,
+            "name": name,
             csrfmiddlewaretoken: '{{ csrf_token }}'
         }
         $.ajax({
             type: "POST",
-            url: "/nurse/",
+            url: "/wardNurse/",
             data: d,
             success: function (data) {
                 result = JSON.parse(data);
-                result = JSON.parse(result);
+                console.log(result)
             }
-        }).then(function (params) {
-            $("#pid").html(result.id)
-            $("#pname").html(result.name)
-            $("#ptemp").html(result.temp)
-            $("#plive").html(result.live)
-            $("#pnat").html(result.nat)
+        }).then(function () {
+            console.log(result)
+            $("#pid").html(id)
+            $("#pname").html(name)
+            $("#plive").html(result.data.live)
+            $("#pnat").html(result.data.result)
+            $("#ptime").html(result.data.time)
+            $("#pSubmit").attr("onclick", "submitConvert(" + result.id + ")")
             changeTo("convertStatus")
         })
     }
@@ -450,7 +454,7 @@
         var result = null;
         $.ajax({
             type: "POST",
-            url: "/nurse/",
+            url: "/wardNurse/",
             data: d,
             success: function (data) {
                 result = JSON.parse(data);
@@ -475,12 +479,31 @@
         })
     }
 
-    function convertStatus() {
+    function submitConvert(id){
         var temp = $("input[name='temp']").val()
         var sympton = $("input[name='sympton']").val()
-        var liveStatus = $("input[name='liveStatus']").val()
-        var nat = $("input[name='nat']").val()
+        var liveStatus = $("input[name='liveStatus']:checked").val()
+        var d = {
+            "code": 5,
+            "temp":temp,
+            "sympton":sympton,
+            "liveStatus":liveStatus, 
+            csrfmiddlewaretoken: '{{ csrf_token }}'
+        }
+        var result = null;
+        $.ajax({
+            type: "POST",
+            url: "/wardNurse/",
+            data: d,
+            success: function (data) {
+            }
+        }).then(
+            function(){
+                changeTo("patient")
+            }
+        )
     }
+
 
     function logout() {
         location.href = "/service/?logout=0"

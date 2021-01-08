@@ -213,7 +213,13 @@
         empty-cells: show;
         border: 1px solid #cbcbcb;
         margin: 0 auto;
+        display: block;
+        overflow-y: scroll;
+        width: fit-content;
+        height: fit-content;
+        max-height: 80%;
     }
+
 
     .pure-table caption {
         color: #000;
@@ -288,7 +294,7 @@
             <button class="btn" onclick="changeTo('nurse');flushNurse()">查看护士信息</button>
             <br>
             <br>
-            <button class="btn" onclick="changeTo('index')">查看病床信息</button>
+            <button class="btn" onclick="changeTo('index');flushWard()">查看病床信息</button>
         </div>
     </div>
     <div class="animated fadeIn main-container active delay-1" id="index">
@@ -297,9 +303,9 @@
             <thead class="thead-dark">
                 <tr>
                     <th scope="col">病床ID</th>
-                    <th scope="col">病床ID</th>
+                    <th scope="col">病床状态</th>
+                    <th scope="col">病人ID</th>
                     <th scope="col">病人姓名</th>
-                    <th scope="col">状态</th>
                 </tr>
             </thead>
             <tbody id="msg">
@@ -325,7 +331,7 @@
                     <br>
                     <input name="choose" type="radio" value="5">是<input name="choose" type="radio" value="6">否
                 </div>
-                <button type="button" style="margin-left:20px;" onclick="choose()">筛选</button>
+                <button type="button" style="margin-left:20px;" id="shaixuan">筛选</button>
             </div>
         </form>
         <br>
@@ -355,6 +361,27 @@
             <tbody id="msgNurse">
             </tbody>
         </table>
+        <br>
+        <a class="a" onclick="show()" id="add" style="margin:20px">+添加护士</a>
+        <form class="dis" id="nurseForm" style="margin:0 auto;margin-left:10%;">
+            <div style="display: flex;">
+                <div style="margin:10px">
+                    <label>姓名</label>
+                    <br>
+                    <label>用户名</label>
+                    <br>
+                    <label>密码</label>
+                </div>
+                <div style="margin:10px">
+                    <input name="name">
+                    <br>
+                    <input name="username">
+                    <br>
+                    <input name="password">
+                </div>
+            </div>
+            <button type="button" onclick="submitNurse()">提交</button>
+        </form>
     </div>
     <div class="dis" id="nursePatient">
         <h2 style="margin-left:20px;margin-top:10px;">护士负责的病人</h2>
@@ -364,7 +391,6 @@
                     <th scope="col">病人ID</th>
                     <th scope="col">病人姓名</th>
                     <th scope="col">病人</th>
-                    <th scope="col">操作</th>
                 </tr>
             </thead>
             <tbody id="msgNursePatient">
@@ -376,9 +402,63 @@
     </div>
 </body>
 <script>
-    window.onload = function () {
+
+    $("#shaixuan").click(choose)
+
+    window.onload = flushWard()
+    var timer2 = null
+
+    function submitNurse(){
+        var name = $("input[name='name']").val()
+        var username = $("input[name='username']").val()
+        var password = $("input[name='password']").val()
+        var d = {
+            "code" :10,
+            "name":name,
+            "username":username,
+            "password":password,
+            csrfmiddlewaretoken: '{{ csrf_token }}'
+        }
+        $.ajax({
+            type: "POST",
+            url: "/nurse/",
+            data: d,
+            success: function (data) {
+            }
+        }).then(
+            function(){
+                flushNurse()
+            }
+        )
+        
+    }
+
+    function show() {
+        if ($("#add").html() == "+添加护士") {
+            $("#add").html("-不添加护士")
+        } else {
+            $("#add").html("+添加护士")
+        }
+        if ($("#nurseForm").hasClass("dis") || $("#nurseForm").hasClass("animated fadeOutDown")) {
+            $("#nurseForm").attr("class", "animated fadeInUp")
+            clearTimeout(timer2)
+        } else if ($("#nurseForm").hasClass("animated fadeInUp")) {
+            $("#nurseForm").attr("class", "animated fadeOutDown")
+            clearTimeout(timer2)
+            timer2 = setTimeout(
+                function () {
+                    $("#nurseForm").attr("class", "dis")
+                }, 500
+            )
+        }
+    }
+
+    function flushWard() {
+        var d = {
+            "code": 9,
+            csrfmiddlewaretoken: '{{ csrf_token }}'
+        }
         var result = null;
-        var d = { "code": 1, csrfmiddlewaretoken: '{{ csrf_token }}' }
         $.ajax({
             type: "POST",
             url: "/nurse/",
@@ -387,65 +467,26 @@
                 result = JSON.parse(data);
                 result = JSON.parse(result);
             }
-        }).then(
-            function () {
-                if (result.data != []) {
-                    console.log(result.data)
-                    $.each(result.data, function (n, data) {
-                        $("#msg").append("<tr id='patient" + data.id + "''>");
-                        $("#msg").append("<td>" + data.id + "</td>");
-                        $("#msg").append("<td>" + data.name + "</td>");
-                        $("#msg").append("<td>" + data.status + "</td>");
-                        operation = "<a class='a' onclick='deHos(" + data.id + ")'>出院</a>"
-                        $("#msg").append("<td id='patientOp" + data.id + "'>" + operation + "</td>");
-                        $("#msg").append("</tr>");
-                    })
-                }
+        }).then(function () {
+            if (result.data != []) {
+                $("#msg").html("")
+                $.each(result.data, function (n, data) {
+                    $("#msg").append("<tr id='bed" + data.sid + "''>");
+                    $("#msg").append("<td>" + data.sid + "</td>");
+                    if (data.sstatus == "0") {
+                        $("#msg").append("<td>空</td>");
+                        $("#msg").append("<td></td>");
+                        $("#msg").append("<td></td>");
+                    } else {
+                        $("#msg").append("<td>有人</td>");
+                        $("#msg").append("<td>" + data.pid + "</td>");
+                        $("#msg").append("<td>" + data.pname + "</td>");
+                    }
+                    $("#msg").append("</tr>");
+                })
             }
-        )
-    };
-
-    function deHos(id) {
-        var data = {
-            code: 5,
-            id: id, csrfmiddlewaretoken: '{{ csrf_token }}'
-        }
-        $("#patientOp" + id).html("操作中……")
-        $.ajax({
-            type: "POST",
-            url: "/nurse/",
-            data: d,
-            success: function (data) {
-            }
-        }).then(
-            function () {
-                $("#patient" + id).remove();
-            }
-        )
+        })
     }
-
-    function die(id) {
-        function deHos(id) {
-            var data = {
-                code: 8,
-                id: id, csrfmiddlewaretoken: '{{ csrf_token }}'
-            }
-            $("#patientOp" + id).html("已死")
-            $.ajax({
-                type: "POST",
-                url: "/nurse/",
-                data: d,
-                success: function (data) {
-                }
-            }).then(
-                function () {
-                    $("#patient" + id).remove();
-                }
-            )
-        }
-    }
-
-
 
     var timer = null;
 
@@ -459,14 +500,13 @@
         var choose = $("input[name='choose']:checked").val()
         var d = {
             "code": 4,
-            "param": {
-                "choose":choose
-            }, csrfmiddlewaretoken: '{{ csrf_token }}'
+            "choose": choose,
+            csrfmiddlewaretoken: '{{ csrf_token }}'
         }
         var result = null;
         $.ajax({
             type: "POST",
-            url: "/doctor/",
+            url: "/nurse/",
             data: d,
             success: function (data) {
                 result = JSON.parse(data);
@@ -474,18 +514,12 @@
             }
         }).then(function () {
             if (result.data != []) {
+                $("#msgPatient").html("")
                 $.each(result.data, function (n, data) {
-                    $("#msgPatient").html("")
                     $("#msgPatient").append("<tr id='patientAll" + data.id + "''>");
                     $("#msgPatient").append("<td>" + data.id + "</td>");
                     $("#msgPatient").append("<td>" + data.name + "</td>");
                     $("#msgPatient").append("<td>" + data.status + "</td>");
-                    operation = "已逝"
-                    if (data.life == 0) {
-                        operation = "<a class='a' onclick='convertStatus(" + data.id + ",\"" + data.name + "\")'>修改</a>" +
-                            "<a class='a' onclick='die(" + data.id + ")'>去世</a>"
-                    }
-                    $("#msgPatient").append("<td id='patientAllOp" + data.id + "'>" + operation + "</td>");
                     $("#msgPatient").append("</tr>");
                 })
             }
@@ -507,18 +541,12 @@
             }
         }).then(function () {
             if (result.data != []) {
+                $("#msgPatient").html("")
                 $.each(result.data, function (n, data) {
-                    $("#msgPatient").html("")
                     $("#msgPatient").append("<tr id='patientAll" + data.id + "''>");
                     $("#msgPatient").append("<td>" + data.id + "</td>");
                     $("#msgPatient").append("<td>" + data.name + "</td>");
                     $("#msgPatient").append("<td>" + data.status + "</td>");
-                    operation = "已逝"
-                    if (data.life == 0) {
-                        operation = "<a class='a' onclick='convertStatus(" + data.id + ",\"" + data.name + "\")'>修改</a>" +
-                            "<a class='a' onclick='die(" + data.id + ")'>去世</a>"
-                    }
-                    $("#msgPatient").append("<td id='patientAllOp" + data.id + "'>" + operation + "</td>");
                     $("#msgPatient").append("</tr>");
                 })
             }
@@ -540,17 +568,15 @@
             }
         }).then(function () {
             if (result.data != []) {
+                $("#msgNurse").html("")
                 $.each(result.data, function (n, data) {
-                    $("#msgNurse").html("")
                     $("#msgNurse").append("<tr id='nurse" + data.id + "''>");
                     $("#msgNurse").append("<td>" + data.id + "</td>");
                     $("#msgNurse").append("<td>" + data.name + "</td>");
                     var auth = "病房护士"
                     $("#msgNurse").append("<td>" + auth + "</td>");
-                    var operation = ""
-                    if (data.auth == "0") {
-                        operation = "<a class='a' onclick='checkPatient(" + data.id + ",\"" + data.name + "\")'>负责病人</a>"
-                    }
+                    var operation = "<a class='a' onclick='checkPatient(" + data.id + ",\"" + data.name + "\")'>负责病人</a>"
+                    operation += "<a class='a' onclick='deleteNurse(" + data.id + ")'>删除</a>"
                     $("#msgNurse").append("<td id='nurseOp" + data.id + "'>" + operation + "</td>");
                     $("#msgNurse").append("</tr>");
                 })
@@ -561,9 +587,7 @@
     function checkPatient(id, name) {
         d = {
             "code": 7,
-            "param": {
-                "nurse": id
-            },
+            "nurse": id,
             csrfmiddlewaretoken: '{{ csrf_token }}'
         }
         $.ajax({
@@ -577,18 +601,12 @@
             }
         }).then(function () {
             if (result.data != []) {
+                $("#msgNursePatient").html("")
                 $.each(result.data, function (n, data) {
-                    $("#msgNursePatient").html("")
                     $("#msgNursePatient").append("<tr id='patientAll" + data.id + "''>");
                     $("#msgNursePatient").append("<td>" + data.id + "</td>");
                     $("#msgNursePatient").append("<td>" + data.name + "</td>");
                     $("#msgNursePatient").append("<td>" + data.status + "</td>");
-                    operation = "已逝"
-                    if (data.life == 0) {
-                        operation = "<a class='a' onclick='convertStatus(" + data.id + ",\"" + data.name + "\")'>修改</a>" +
-                            "<a class='a' onclick='die(" + data.id + ")'>去世</a>"
-                    }
-                    $("#msgNursePatient").append("<td id='patientAllOp" + data.id + "'>" + operation + "</td>");
                     $("#msgNursePatient").append("</tr>");
                 })
             }
@@ -601,14 +619,10 @@
         location.href = "/service/?logout=0"
     }
 
-    function submitConvert(params, id) {
-        var life = $("input[name='patientStatus']:checked").val()
+    function deleteNurse(id) {
         d = {
-            "code": 7,
-            "param": {
-                "life": life,
-                "id": id
-            },
+            "code": 8,
+            "nurse": id,
             csrfmiddlewaretoken: '{{ csrf_token }}'
         }
         $.ajax({
@@ -617,8 +631,13 @@
             data: d,
             success: function (data) {
             }
-        })
+        }).then(
+            function () {
+                flushNurse()
+            }
+        )
     }
+
 
 
 </script>

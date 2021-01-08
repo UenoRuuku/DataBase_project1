@@ -384,8 +384,29 @@
             <input type="radio" name="patientStatus" value="3">危重症
             <br>
             <br>
-            <button type="button" onclick="submitConvert()">确定</button>
+            <button type="button" id="1b" onclick="submitConvert()">确定</button>
         </form>
+        <br>
+        <br>
+        <form style="margin:0 auto;margin-left:10%;">
+            <span style="color:black">添加核酸检测单吗？</span>
+            <br>
+            <br>
+            <label>检查结果</label>
+            <input type="radio" name="result" value='0'>阴性<input type="radio" name="result" value="1">阳性
+            <br>
+            <label>核酸检测的时间</label>
+            <input type="datetime-local" name="date" required>
+            <br>
+            <label>病情评级</label>            
+            <input type="radio" name="patientStatus2" value="1">轻症
+            <input type="radio" name="patientStatus2" value="2">重症
+            <input type="radio" name="patientStatus2" value="3">危重症
+            <br>
+            <br>
+            <button type="button" id="2b" onclick="submitNat()">确定</button>
+        </form>
+        
     </div>
     <div style="position: fixed;bottom:5%;right:10%">
         <button class="btn" onclick="logout()">登出</button>
@@ -470,7 +491,8 @@
 
     function convertStatus(id, name) {
         $("#patientChange").find("h2").html(name + "的病情修改")
-        $("#patientChange").find("button").attr("onclick", "submitConvert('" + id + "')")
+        $("#1b").attr("onclick", "submitConvert('" + id + "')")
+        $("#2b").attr("onclick", "submitNat('" + id + "')")
         changeTo("patientChange")
     }
 
@@ -646,6 +668,34 @@
             }
         )
     }
+
+    
+    function submitNat(id) {
+        var result = $("input[name='result']:checked").val()
+        var date = $("input[name='date']").val()+":00"
+        var life = $("input[name='patientStatus2']:checked").val()
+        d = {
+            "code": 10,
+            "pid": id,
+            "result": result,
+            "date":date,
+            "life":life,
+            csrfmiddlewaretoken: '{{ csrf_token }}'
+        }
+        $.ajax({
+            type: "POST",
+            url: "/doctor/",
+            data: d,
+            success: function (data) {
+            }
+        }).then(
+            function () {
+                changeTo("patient")
+            }
+        )
+    }
+
+    
 
 </script>
 
