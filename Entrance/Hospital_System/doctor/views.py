@@ -17,7 +17,7 @@ from Service.DoctorService import *
 
 # Create your views here.
 
-log = logger.create_logger(config.LOG_LEVEL, config.LOG_ROOT, config.LOG_NAME)
+from util.logger import logggg as log
 
 
 def unpack(request):
@@ -49,7 +49,12 @@ def unpack(request):
     elif code == 8:
         die = int(request.POST.get("pid"))
         back_dic = patientDie(die, id)
-
+    elif code == 10:
+        result = request.POST.get("result")
+        date = request.POST.get("date")
+        life = request.POST.get("life")
+        pid = request.POST.get("pid")
+        back_dic = addNat(pid, result, life, date)
     return HttpResponse(json.dumps(back_dic))
 
 
@@ -118,8 +123,6 @@ def getAllNurse(id):
             "auth": auth
         }
         back_dic["data"].append(item)
-
-    print(json.dumps(back_dic))
     return json.dumps(back_dic)
 
 
@@ -202,4 +205,24 @@ def getPatientByNurse(nurse):
     for (a, b, c) in back_list:
         item = {"id": a, "name": b, "status": c}
         back_dic["data"].append(item)
+    return json.dumps(back_dic)
+
+
+def addNat(id, result, life, date):
+    log.info("添加核酸检测单给" + str(id))
+    il_level = [
+        "轻症",
+        "重症",
+        "危重症"
+    ]
+    result_level = [
+        "阴性",
+        "阳性"
+    ]
+    add_nat_report(result_level[int(result)], date, il_level[int(life)-1], int(id))
+    back_dic = {
+        "code": "1",
+        "msg": "success",
+        "data": []
+    }
     return json.dumps(back_dic)
