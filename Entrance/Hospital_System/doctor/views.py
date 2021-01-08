@@ -95,6 +95,8 @@ def getAllPatient(id):
         life = 0
         if c == "病亡":
             life = 1
+        if c is None:
+            c = "暂无"
         item = {"id": a, "name": b, "status": c + "," + status[d + 1], "life": life}
         back_dic["data"].append(item)
     return json.dumps(back_dic)
@@ -139,6 +141,8 @@ def getExPatient(choose, id):
         life = 0
         if c == "病亡":
             life = 1
+        if c is None:
+            c = "暂无"
         item = {"id": a, "name": b, "status": c + "," + status[d + 1], "life": life}
         back_dic["data"].append(item)
     return json.dumps(back_dic)
@@ -146,7 +150,7 @@ def getExPatient(choose, id):
 
 def patientOut(pid):
     log.info("使" + str(pid) + "病人出院")
-    update_patient_life_status("康复出院",pid)
+    update_patient_life_status("康复出院", pid)
     back_dic = {
         "code": "1",
         "msg": "success",
@@ -193,6 +197,8 @@ def getPatientByNurse(nurse):
         "data": []
     }
     for (a, b, c) in back_list:
+        if c is None:
+            c = "暂无"
         item = {"id": a, "name": b, "status": c}
         back_dic["data"].append(item)
     return json.dumps(back_dic)
@@ -209,7 +215,7 @@ def addNat(id, result, life, date):
         "阴性",
         "阳性"
     ]
-    add_nat_report(result_level[int(result)], date, il_level[int(life)-1], int(id))
+    add_nat_report(result_level[int(result)], date, il_level[int(life) - 1], int(id))
     back_dic = {
         "code": "1",
         "msg": "success",

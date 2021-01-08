@@ -91,6 +91,8 @@ def getAllPatient(id):
         life = 0
         if c == "病亡":
             life = 1
+        if c is None:
+            c = "暂无"
         item = {"id": a, "name": b, "status": c + "," + status[d + 1], "life": life}
         back_dic["data"].append(item)
     return json.dumps(back_dic)
@@ -112,24 +114,3 @@ def getNat(pid):
     }
     return back_dic
 
-
-def getExPatient(id, choose):
-    log.info("按照筛选条件搜索病人的病人")
-    back_list = nurse_master_query_patient(id, int(choose))
-    back_dic = {
-        "code": "1",
-        "msg": "success",
-        "data": []
-    }
-    status = [
-        "可出院",
-        "治疗中",
-        "待转移"
-    ]
-    for (a, b, c, d) in back_list:
-        life = 0
-        if c == "病亡":
-            life = 1
-        item = {"id": a, "name": b, "status": c + "," + status[d + 1], "life": life}
-        back_dic["data"].append(item)
-    return json.dumps(back_dic)

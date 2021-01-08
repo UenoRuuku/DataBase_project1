@@ -95,6 +95,8 @@ def getAllPatient(id):
         "待转移"
     ]
     for (a, b, c, d) in back_list:
+        if c is None:
+            c = "暂无"
         item = {"id": a, "name": b, "status": c + status[d + 1]}
         back_dic["data"].append(item)
     return json.dumps(back_dic)
@@ -130,6 +132,8 @@ def getPatientByNurse(nurse):
         "data": []
     }
     for (a, b, c) in back_list:
+        if c is None:
+            c = "暂无"
         item = {"id": a, "name": b, "status": c}
         back_dic["data"].append(item)
     return json.dumps(back_dic)
@@ -152,6 +156,8 @@ def getExPatient(id, choose):
         life = 0
         if c == "病亡":
             life = 1
+        if c is None:
+            c = "暂无"
         item = {"id": a, "name": b, "status": c + "," + status[d + 1], "life": life}
         back_dic["data"].append(item)
     return json.dumps(back_dic)
@@ -198,6 +204,8 @@ def getPatientByNurse(nurse):
         "data": []
     }
     for (a, b, c) in back_list:
+        if c is None:
+            c = "暂无"
         item = {"id": a, "name": b, "status": c}
         back_dic["data"].append(item)
     return json.dumps(back_dic)

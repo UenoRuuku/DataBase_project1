@@ -213,6 +213,12 @@
         empty-cells: show;
         border: 1px solid #cbcbcb;
         margin: 0 auto;
+        display: block;
+        overflow-y: scroll;
+        width: fit-content;
+        height: fit-content;
+        max-height: 60%;
+
     }
 
     .pure-table caption {
@@ -288,7 +294,7 @@
             <button class="btn" onclick="changeTo('nurse');flushNurse()">查看护士信息</button>
             <br>
             <br>
-            <button class="btn" onclick="changeTo('index')">待处理信息</button>
+            <button class="btn" onclick="changeTo('index');flushIndex()">待处理信息</button>
         </div>
     </div>
     <div class="animated fadeIn main-container active delay-1" id="index">
@@ -398,7 +404,7 @@
             <label>核酸检测的时间</label>
             <input type="datetime-local" name="date" required>
             <br>
-            <label>病情评级</label>            
+            <label>病情评级</label>
             <input type="radio" name="patientStatus2" value="1">轻症
             <input type="radio" name="patientStatus2" value="2">重症
             <input type="radio" name="patientStatus2" value="3">危重症
@@ -406,7 +412,7 @@
             <br>
             <button type="button" id="2b" onclick="submitNat()">确定</button>
         </form>
-        
+
     </div>
     <div style="position: fixed;bottom:5%;right:10%">
         <button class="btn" onclick="logout()">登出</button>
@@ -417,7 +423,7 @@
 
     $("#shaixuan").click(choose);
 
-    function flushIndex(){
+    function flushIndex() {
         var result = null;
         var d = { "code": 1, csrfmiddlewaretoken: '{{ csrf_token }}' }
         $.ajax({
@@ -431,7 +437,7 @@
         }).then(
             function () {
                 if (result.data != []) {
-                    console.log(result.data)
+                    $("#msg").html("");
                     $.each(result.data, function (n, data) {
                         $("#msg").append("<tr id='patient" + data.id + "''>");
                         $("#msg").append("<td>" + data.id + "</td>");
@@ -667,22 +673,23 @@
             }
         }).then(
             function () {
+                flushPatient()
                 changeTo("patient")
             }
         )
     }
 
-    
+
     function submitNat(id) {
         var result = $("input[name='result']:checked").val()
-        var date = $("input[name='date']").val()+":00"
+        var date = $("input[name='date']").val() + ":00"
         var life = $("input[name='patientStatus2']:checked").val()
         d = {
             "code": 10,
             "pid": id,
             "result": result,
-            "date":date,
-            "life":life,
+            "date": date,
+            "life": life,
             csrfmiddlewaretoken: '{{ csrf_token }}'
         }
         $.ajax({
@@ -693,12 +700,13 @@
             }
         }).then(
             function () {
+                flushPatient()
                 changeTo("patient")
             }
         )
     }
 
-    
+
 
 </script>
 

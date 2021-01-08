@@ -381,9 +381,9 @@
                 result = JSON.parse(result);
             }
         }).then(function () {
-            if (result.data != []) {
+            if (result.data != []) {                    
+                $("#msgPatient").html("")
                 $.each(result.data, function (n, data) {
-                    $("#msgPatient").html("")
                     $("#msgPatient").append("<tr id='patientAll" + data.id + "''>");
                     $("#msgPatient").append("<td>" + data.id + "</td>");
                     $("#msgPatient").append("<td>" + data.name + "</td>");
@@ -441,9 +441,9 @@
                 result = JSON.parse(result);
             }
         }).then(function () {
-            if (result.data != []) {
+            if (result.data != []) {                    
+                $("#msgPatient").html("")
                 $.each(result.data, function (n, data) {
-                    $("#msgPatient").html("")
                     $("#msgPatient").append("<tr id='patientAll" + data.id + "''>");
                     $("#msgPatient").append("<td>" + data.id + "</td>");
                     $("#msgPatient").append("<td>" + data.name + "</td>");
