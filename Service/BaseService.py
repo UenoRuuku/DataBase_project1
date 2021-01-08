@@ -15,12 +15,12 @@ def login(username, password):
     :param password: 登录的密码
     :return: 登录密码是否与数据库相符
     """
-    cursor.execute("select password from user where username='%s'" % username)
+    cursor.execute("select password,user_type,u_id from user where username='%s'" % username)
     result = cursor.fetchall()
     if len(result) != 0 and result[0][0] == password:
-        return True
+        return True, result[0][1], result[0][2]
     else:
-        return False
+        return False, None, None
 
 
 def find_available_sickbed_and_nurse(illness_level):

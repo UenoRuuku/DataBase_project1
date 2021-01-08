@@ -120,7 +120,7 @@ def doctor_query_patient(doctor_id, query_type):
                 info_to_query.append(result[0])
     elif query_type == 0:
         for p_id in all_patient:
-            cursor.execute("select patient.p_id,name,life_status "
+            cursor.execute("select patient.p_id,name,life_status,transfer "
                            "from patient left join patient_status on patient.p_id=patient_status.p_id "
                            "where patient.p_id=%d order by time desc" % p_id)
             result = cursor.fetchall()
@@ -128,7 +128,7 @@ def doctor_query_patient(doctor_id, query_type):
                 info_to_query.append(result[0])
     elif query_type == 1:
         for p_id in all_patient:
-            cursor.execute("select patient.p_id,name,life_status "
+            cursor.execute("select patient.p_id,name,life_status,transfer "
                            "from patient left join patient_status on patient.p_id=patient_status.p_id "
                            "where patient.p_id=%d order by time desc" % p_id)
             result = cursor.fetchall()
@@ -136,7 +136,7 @@ def doctor_query_patient(doctor_id, query_type):
                 info_to_query.append(result[0])
     elif query_type == 2:
         for p_id in all_patient:
-            cursor.execute("select patient.p_id,name,life_status "
+            cursor.execute("select patient.p_id,name,life_status,transfer "
                            "from patient left join patient_status on patient.p_id=patient_status.p_id "
                            "where patient.p_id=%d order by time desc" % p_id)
             result = cursor.fetchall()

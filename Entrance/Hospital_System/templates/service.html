@@ -325,7 +325,7 @@
                     <br>
                     <input name="choose" type="radio" value="5">是<input name="choose" type="radio" value="6">否
                 </div>
-                <button type="button" style="margin-left:20px;" onclick="choose()">筛选</button>
+                <button type="button" style="margin-left:20px;" id="shaixuan">筛选</button>
             </div>
         </form>
         <br>
@@ -364,8 +364,7 @@
                 <tr>
                     <th scope="col">病人ID</th>
                     <th scope="col">病人姓名</th>
-                    <th scope="col">病人</th>
-                    <th scope="col">操作</th>
+                    <th scope="col">病人信息</th>
                 </tr>
             </thead>
             <tbody id="msgNursePatient">
@@ -380,9 +379,9 @@
             <br>
             <input type="radio" name="patientStatus" value="1">轻症
             <br>
-            <input type="radio" name="patientStatus" value="2">微重症
+            <input type="radio" name="patientStatus" value="2">重症
             <br>
-            <input type="radio" name="patientStatus" value="3">重症
+            <input type="radio" name="patientStatus" value="3">危重症
             <br>
             <br>
             <button type="button" onclick="submitConvert()">确定</button>
@@ -422,10 +421,13 @@
         )
     };
 
+    $("#shaixuan").click(choose);
+
     function deHos(id) {
         var data = {
             code: 5,
-            id: id, csrfmiddlewaretoken: '{{ csrf_token }}'
+            pid: id,
+            csrfmiddlewaretoken: '{{ csrf_token }}'
         }
         $("#patientOp" + id).html("操作中……")
         $.ajax({
@@ -442,24 +444,28 @@
     }
 
     function die(id) {
-        function deHos(id) {
-            var data = {
-                code: 8,
-                id: id, csrfmiddlewaretoken: '{{ csrf_token }}'
-            }
-            $("#patientOp" + id).html("已死")
-            $.ajax({
-                type: "POST",
-                url: "/doctor/",
-                data: d,
-                success: function (data) {
-                }
-            }).then(
-                function () {
-                    $("#patient" + id).remove();
-                }
-            )
+        var d = {
+            code: 8,
+            pid: id,
+            csrfmiddlewaretoken: '{{ csrf_token }}'
         }
+        $("#patientOp" + id).html("已逝")
+        $("#patientAllOp" + id).html("已逝")
+        $("#patientNurseOp" + id).html("已逝")
+        console.log("ajax!!!")
+        $.ajax({
+            type: "POST",
+            url: "/doctor/",
+            data: d,
+            success: function (data) {
+                console.log("successs!!!")
+            }
+        }).then(
+            function () {
+                $("#patient" + id).remove();
+            }
+        )
+
     }
 
     function convertStatus(id, name) {
@@ -481,10 +487,10 @@
         var choose = $("input[name='choose']:checked").val()
         var d = {
             "code": 4,
-            "param": {
-                "choose":choose
-            }, csrfmiddlewaretoken: '{{ csrf_token }}'
+            "choose": choose,
+            csrfmiddlewaretoken: '{{ csrf_token }}'
         }
+        console.log(choose)
         var result = null;
         $.ajax({
             type: "POST",
@@ -496,8 +502,8 @@
             }
         }).then(function () {
             if (result.data != []) {
+                $("#msgPatient").html("")
                 $.each(result.data, function (n, data) {
-                    $("#msgPatient").html("")
                     $("#msgPatient").append("<tr id='patientAll" + data.id + "''>");
                     $("#msgPatient").append("<td>" + data.id + "</td>");
                     $("#msgPatient").append("<td>" + data.name + "</td>");
@@ -529,8 +535,8 @@
             }
         }).then(function () {
             if (result.data != []) {
+                $("#msgPatient").html("")
                 $.each(result.data, function (n, data) {
-                    $("#msgPatient").html("")
                     $("#msgPatient").append("<tr id='patientAll" + data.id + "''>");
                     $("#msgPatient").append("<td>" + data.id + "</td>");
                     $("#msgPatient").append("<td>" + data.name + "</td>");
@@ -562,8 +568,8 @@
             }
         }).then(function () {
             if (result.data != []) {
+                $("#msgNurse").html("")
                 $.each(result.data, function (n, data) {
-                    $("#msgNurse").html("")
                     $("#msgNurse").append("<tr id='nurse" + data.id + "''>");
                     $("#msgNurse").append("<td>" + data.id + "</td>");
                     $("#msgNurse").append("<td>" + data.name + "</td>");
@@ -602,18 +608,12 @@
             }
         }).then(function () {
             if (result.data != []) {
+                $("#msgNursePatient").html("")
                 $.each(result.data, function (n, data) {
-                    $("#msgNursePatient").html("")
                     $("#msgNursePatient").append("<tr id='patientAll" + data.id + "''>");
                     $("#msgNursePatient").append("<td>" + data.id + "</td>");
                     $("#msgNursePatient").append("<td>" + data.name + "</td>");
                     $("#msgNursePatient").append("<td>" + data.status + "</td>");
-                    operation = "已逝"
-                    if (data.life == 0) {
-                        operation = "<a class='a' onclick='convertStatus(" + data.id + ",\"" + data.name + "\")'>修改</a>" +
-                            "<a class='a' onclick='die(" + data.id + ")'>去世</a>"
-                    }
-                    $("#msgNursePatient").append("<td id='patientAllOp" + data.id + "'>" + operation + "</td>");
                     $("#msgNursePatient").append("</tr>");
                 })
             }
@@ -626,14 +626,12 @@
         location.href = "/service/?logout=0"
     }
 
-    function submitConvert(params, id) {
+    function submitConvert(id) {
         var life = $("input[name='patientStatus']:checked").val()
         d = {
-            "code": 7,
-            "param": {
-                "life": life,
-                "id": id
-            },
+            "code": 6,
+            "pid": id,
+            "life": life,
             csrfmiddlewaretoken: '{{ csrf_token }}'
         }
         $.ajax({
@@ -642,9 +640,12 @@
             data: d,
             success: function (data) {
             }
-        })
+        }).then(
+            function () {
+                changeTo("patient")
+            }
+        )
     }
-
 
 </script>
 

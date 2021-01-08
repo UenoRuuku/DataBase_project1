@@ -1,6 +1,19 @@
+import inspect
+import json
+import os
+import sys
+
+current_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parent_dir = os.path.dirname(current_dir)
+sys.path.insert(0, parent_dir)
+sys.path.append('../')
+sys.path.append('../..')
+sys.path.append('../../..')
+
 from django.contrib.auth import logout
 from django.shortcuts import render
 from django.template import RequestContext
+from Service.BaseService import *
 
 
 def run_service(request):
@@ -13,10 +26,9 @@ def run_service(request):
 
 
 def check_user(request):
-    # logout(request)
+    logout(request)
 
-    print(request.POST)
-    if request.method == "GET" and "username" not in request.session:
+    if request.method == "GET":
         return render(request, "login.html", context={
             'code': 2,
             'msg': 'have to login',
@@ -42,20 +54,28 @@ def check_user(request):
             username = request.POST.get("username")
             password = request.POST.get("password")
             # todo:调用检查username是否正确的函数
-            if username == "18302010013" and password == "1234":
+            (k, v, d) = login(username, password)
+            if k:
                 # 若正确
-                request.session['username'] = "Ruuku"
+                request.session['username'] = username
                 # 获取权限
-                request.session['auth'] = 0
-                request.session['id'] = username
+                request.session['auth'] = v
+                request.session['id'] = d
                 context = {
                     'code': 1,
                     'msg': 'login success',
                     'wait': 3,
                     'name': request.session['username'],
-                    'auth': '主治医生'
+                    'auth': v
                 }
-                return render(request, "wardNurse.html", context=context)
+                if v == "doctor":
+                    return render(request, "service.html", context=context)
+                elif v == "nurse_master":
+                    return render(request, "nurse.html", context=context)
+                elif v == "ward_nurse":
+                    return render(request, "wardNurse.html", context=context)
+                elif v == "em_nurse":
+                    return render(request, "emNurse.html", context=context)
             else:
                 return render(request, "login.html", context={
                     'code': 2,
@@ -64,9 +84,17 @@ def check_user(request):
                     'wait': 3
                 })
     elif "username" in request.session:
-        return render(request, "wardNurse.html", context={
+        context = {
             'code': 1,
             'msg': 'loaned',
             'name': request.session["username"],
             'wait': 3
-        })
+        }
+        if request.session['auth'] == "doctor":
+            return render(request, "service.html", context=context)
+        elif request.session['auth'] == "nurse_master":
+            return render(request, "nurse.html", context=context)
+        elif request.session['auth'] == "ward_nurse":
+            return render(request, "wardNurse.html", context=context)
+        elif request.session['auth'] == "em_nurse":
+            return render(request, "emNurse.html", context=context)
