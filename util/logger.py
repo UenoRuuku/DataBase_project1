@@ -4,6 +4,7 @@
 
 import logging
 import time
+from util import config
 
 # 使用方法：
 #   logger = log.create_logger(config.LOG_LEVEL, config.LOG_PATH, LOG_NAME)
@@ -12,8 +13,6 @@ import time
 #           config.LOG_ROOT+"\\database_connect_log", "database_connect_log")
 #         logger.debug(MESSAGE) 即可向指定log进行记录
 
-
-# 创建一个级别为level的logger debug打印到文件和控制台 info及以上打到文件
 def create_logger(level, log_file_path, logger_name, print_stream_cmd=False):
     logger = logging.getLogger(logger_name)
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
@@ -39,3 +38,6 @@ def log(func):
         return ret
 
     return wrapper
+
+
+logggg = create_logger(config.LOG_LEVEL, config.LOG_ROOT, config.LOG_NAME)# 创建一个级别为level的logger debug打印到文件和控制台 info及以上打到文件

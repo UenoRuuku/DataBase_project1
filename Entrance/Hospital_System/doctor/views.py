@@ -23,7 +23,6 @@ from util.logger import logggg as log
 def unpack(request):
     code = int(request.POST.get("code"))
     id = request.session["id"]
-    print(code)
     log.info(str(request.session["username"]) + str(request.session["auth"]) + "访问了数据库")
     back_dic = ""
     if code == 1:
@@ -39,7 +38,6 @@ def unpack(request):
         pid = int(request.POST.get("pid"))
         back_dic = patientOut(pid)
     elif code == 6:
-        print(request.POST)
         pid = int(request.POST.get("pid"))
         life = int(request.POST.get("life"))
         back_dic = moreOperation(pid, life)
@@ -72,7 +70,6 @@ def getPatientOut(id):
         "待转移"
     ]
     for (a, b, c, d) in back_list:
-        print(a, b, c, d)
         life = 0
         if c == "病亡":
             life = 1
@@ -95,7 +92,6 @@ def getAllPatient(id):
         "待转移"
     ]
     for (a, b, c, d) in back_list:
-        print(a, b, c, d)
         life = 0
         if c == "病亡":
             life = 1
@@ -128,9 +124,7 @@ def getAllNurse(id):
 
 def getExPatient(choose, id):
     log.info("按照筛选条件搜索病人的病人")
-    print(choose)
     back_list = doctor_query_patient(id, int(choose))
-    print(back_list)
     back_dic = {
         "code": "1",
         "msg": "success",
@@ -142,7 +136,6 @@ def getExPatient(choose, id):
         "待转移"
     ]
     for (a, b, c, d) in back_list:
-        print(a, b, c, d)
         life = 0
         if c == "病亡":
             life = 1
@@ -153,14 +146,13 @@ def getExPatient(choose, id):
 
 def patientOut(pid):
     log.info("使" + str(pid) + "病人出院")
-    update_nat_illness_level("康复出院", pid)
+    update_patient_life_status("康复出院",pid)
     back_dic = {
         "code": "1",
         "msg": "success",
         "data": [
         ]
     }
-    print(json.dumps(back_dic))
     return json.dumps(back_dic)
 
 
@@ -172,7 +164,6 @@ def patientDie(die, id):
         "data": []
     }
     update_patient_life_status("病亡", die)
-    print(json.dumps(back_dic))
     return json.dumps(back_dic)
 
 
@@ -201,7 +192,6 @@ def getPatientByNurse(nurse):
         "msg": "success",
         "data": []
     }
-    print(back_list)
     for (a, b, c) in back_list:
         item = {"id": a, "name": b, "status": c}
         back_dic["data"].append(item)

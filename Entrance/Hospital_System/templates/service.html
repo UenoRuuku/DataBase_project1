@@ -413,7 +413,11 @@
     </div>
 </body>
 <script>
-    window.onload = function () {
+    window.onload = flushIndex()
+
+    $("#shaixuan").click(choose);
+
+    function flushIndex(){
         var result = null;
         var d = { "code": 1, csrfmiddlewaretoken: '{{ csrf_token }}' }
         $.ajax({
@@ -440,12 +444,11 @@
                 }
             }
         )
-    };
+    }
 
-    $("#shaixuan").click(choose);
 
     function deHos(id) {
-        var data = {
+        var d = {
             code: 5,
             pid: id,
             csrfmiddlewaretoken: '{{ csrf_token }}'
@@ -459,7 +462,7 @@
             }
         }).then(
             function () {
-                $("#patient" + id).remove();
+                flushIndex()
             }
         )
     }

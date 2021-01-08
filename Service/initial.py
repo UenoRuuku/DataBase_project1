@@ -9,7 +9,9 @@ init_ward_number = [5, 5, 3]
 init_ward_nurse_per_area = [3, 2, 2]
 sickbed_per_ward = [4, 2, 1]
 
-log = logger.create_logger(config.LOG_LEVEL, config.LOG_ROOT, config.LOG_NAME)
+
+from util.logger import logggg as log
+
 
 log.info("----------------------------")
 log.info("start initializing.")

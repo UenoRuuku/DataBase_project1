@@ -213,7 +213,11 @@
         empty-cells: show;
         border: 1px solid #cbcbcb;
         margin: 0 auto;
+        display: block;
+        width: fit-content;
         height: fit-content;
+        max-height: 60%;
+        overflow-y: scroll;
     }
 
     .pure-table caption {
@@ -278,16 +282,46 @@
         </div>
     </section>
     <div class="nav">
-        <h3 class="animated fadeIn">欢迎，{{name}}病房护士</h3>
+        <h3 class="animated fadeIn">欢迎，{{name}}急诊护士</h3>
         <span class="animated fadeIn think">我想，您可以……</span>
         <br>
         <br>
         <div class="animated fadeIn button-combine">
             <button class="btn" onclick="changeTo('patient');flushPatient()">查看病人信息</button>
+            <br>
+            <br>
+            <button class="btn" onclick="changeTo('index')">新增病人</button>
         </div>
     </div>
     <div class="animated fadeIn main-container active delay-1" id="patient">
         <h2 style="margin-left:20px;margin-top:10px;">病人信息查询</h2>
+        <form style="margin:0 auto;margin-left:10%;">
+            <div style="display: flex;">
+                <div>
+                    <label>治疗区域(隔离区/全部)</label>
+                    <br>
+                    <label>其他条件</label>
+                    <br>
+                </div>
+                <div>
+                    <input name="choose1" type="radio" value="轻症治疗区域">轻症
+                    <input name="choose1" type="radio" value="重症治疗区域">重症
+                    <input name="choose1" type="radio" value="危重症治疗区域">危重症
+                    <br>
+                    <input name="choose2" type="radio" value="-1">全部
+                    <input name="choose2" type="radio" value="0">隔离区
+                    <input name="choose2" type="radio" value="1">出院
+                    <br>
+                    <input name="choose2" type="radio" value="2">治疗中
+                    <input name="choose2" type="radio" value="3">去世
+                    <input name="choose2" type="radio" value="4">轻症
+                    <br>
+                    <input name="choose2" type="radio" value="5">重症
+                    <input name="choose2" type="radio" value="6">危重症
+                </div>
+                <button type="button" style="margin-left:20px;" id="shaixuan">筛选</button>
+            </div>
+        </form>
         <br>
         <table class="pure-table">
             <thead class="thead-dark">
@@ -295,54 +329,39 @@
                     <th scope="col">病人ID</th>
                     <th scope="col">病人姓名</th>
                     <th scope="col">状态</th>
-                    <th scope="col">操作</th>
                 </tr>
             </thead>
             <tbody id="msgPatient">
             </tbody>
         </table>
     </div>
-    <div class="dis" id="convertStatus">
-        <h2 style="margin-left:20px;margin-top:10px;">病人信息更新</h2>
-        <table class="pure-table">
-            <tbody>
-                <tr>
-                    <td>病人id</td>
-                    <td id="pid"></td>
-                </tr>
-                <tr>
-                    <td>病人姓名</td>
-                    <td id="pname"></td>
-                </tr>
-                <tr>
-                    <td>登记时间</td>
-                    <td id="ptime"></td>
-                </tr>
-                <tr>
-                    <td>病情评级</td>
-                    <td id="plive"></td>
-                </tr>
-                <tr>
-                    <td>核酸检测结果</td>
-                    <td id="pnat"></td>
-                </tr>
-            </tbody>
-        </table>
-        <br>
-        <br>
-        <form style="display:block; margin: 0 auto;width: fit-content;">
-            <label>今日体温</label>
-            <input name="temp">
+    <div class="dis" id="index">
+        <h2 style="margin-left:20px;margin-top:10px;">增加病人</h2>
+        <form style="margin:0 auto;width:fit-content">
+            <label style="margin:5px">姓名</label>
             <br>
-            <label>当前症状</label>
-            <input name="sympton">
-            <br>
-            <label>生命状态</label>
-            <input name="liveStatus" type="radio" value="0">在院治疗
-            <input name="liveStatus" type="radio" value="1">病亡
+            <input name="name">
             <br>
             <br>
-            <button id="pSubmit" type="button" onclick="submitConvert()">提交</button>
+            <label style="margin:5px">核酸检测结果</label>
+            <br>
+            <input name="result" value="0" type="radio">阴性
+            <input name="result" value="1" type="radio">阳性
+            <br>
+            <br>
+            <label style="margin:5px">病情等级</label>
+            <br>
+            <input name="level" value="0" type="radio">轻症
+            <input name="level" value="1" type="radio">重症
+            <input name="level" value="2" type="radio">危重症
+            <br>
+            <br>
+            <label style="margin:5px">病人的基本信息</label>
+            <br>
+            <input name="information">
+            <br>
+            <br>
+            <button type="button" onclick="submitPatient()">确定</button>
         </form>
     </div>
     <div style="position: fixed;bottom:5%;right:10%">
@@ -350,10 +369,34 @@
     </div>
 </body>
 <script>
-    window.onload = function () {
-        flushPatient()
-    }
+    window.onload = flushPatient;
 
+    $("#shaixuan").click(choose);
+
+    function submitPatient() {
+        var name = $("input[name='name']").val()
+        var result = $("input[name='result']:checked").val();
+        var level = $("input[name='level']:checked").val();
+        var information = $("input[name='information']").val();
+        d = {
+            "code": 3,
+            "name": name,
+            "result": result,
+            "level": level,
+            "information": information,
+            csrfmiddlewaretoken: '{{ csrf_token }}'
+        }
+        $.ajax({
+            type: "POST",
+            url: "/emNurse/",
+            data: d,
+            success: function (data) {
+            }
+        }).then(function () {
+            flushPatient()
+            changeTo("patient")
+        })
+    }
 
     var timer = null;
 
@@ -364,17 +407,19 @@
     }
 
     function choose() {
-        var choose = $("input[name='choose']:checked").val()
+        var choose1 = $("input[name='choose1']:checked").val()
+        var choose2 = $("input[name='choose2']:checked").val()
         var d = {
             "code": 4,
-            "param": {
-                "choose": choose
-            }, csrfmiddlewaretoken: '{{ csrf_token }}'
+            "choose1": choose1,
+            "choose2": choose2,
+            csrfmiddlewaretoken: '{{ csrf_token }}'
         }
+        console.log(choose)
         var result = null;
         $.ajax({
             type: "POST",
-            url: "/doctor/",
+            url: "/emNurse/",
             data: d,
             success: function (data) {
                 result = JSON.parse(data);
@@ -382,48 +427,15 @@
             }
         }).then(function () {
             if (result.data != []) {
+                $("#msgPatient").html("")
                 $.each(result.data, function (n, data) {
-                    $("#msgPatient").html("")
                     $("#msgPatient").append("<tr id='patientAll" + data.id + "''>");
                     $("#msgPatient").append("<td>" + data.id + "</td>");
                     $("#msgPatient").append("<td>" + data.name + "</td>");
                     $("#msgPatient").append("<td>" + data.status + "</td>");
-                    operation = "已逝"
-                    if (data.life == 0) {
-                        operation = "<a class='a' onclick='changeTo('convertStatus');convertStatus(" + data.id + ",\'" + data.name + "\')'>等级</a>"
-                    }
-                    $("#msgPatient").append("<td id='patientAllOp" + data.id + "'>" + operation + "</td>");
                     $("#msgPatient").append("</tr>");
                 })
             }
-        })
-    }
-
-    function convertStatus(id, name) {
-        var result = null
-        d = {
-            "code": 3,
-            "pid": id,
-            "name": name,
-            csrfmiddlewaretoken: '{{ csrf_token }}'
-        }
-        $.ajax({
-            type: "POST",
-            url: "/wardNurse/",
-            data: d,
-            success: function (data) {
-                result = JSON.parse(data);
-                console.log(result)
-            }
-        }).then(function () {
-            console.log(result)
-            $("#pid").html(id)
-            $("#pname").html(name)
-            $("#plive").html(result.data.live)
-            $("#pnat").html(result.data.result)
-            $("#ptime").html(result.data.time)
-            $("#pSubmit").attr("onclick", "submitConvert(" + result.data.id + "," + id + ")")
-            changeTo("convertStatus")
         })
     }
 
@@ -434,7 +446,7 @@
         var result = null;
         $.ajax({
             type: "POST",
-            url: "/wardNurse/",
+            url: "/emNurse/",
             data: d,
             success: function (data) {
                 result = JSON.parse(data);
@@ -442,51 +454,23 @@
             }
         }).then(function () {
             if (result.data != []) {
+                $("#msgPatient").html("")
                 $.each(result.data, function (n, data) {
-                    $("#msgPatient").html("")
                     $("#msgPatient").append("<tr id='patientAll" + data.id + "''>");
                     $("#msgPatient").append("<td>" + data.id + "</td>");
                     $("#msgPatient").append("<td>" + data.name + "</td>");
                     $("#msgPatient").append("<td>" + data.status + "</td>");
-                    operation = "<a class='a' onclick='convertStatus(" + data.id + ",\"" + data.name + "\")'>登记</a>"
-                    $("#msgPatient").append("<td id='patientAllOp" + data.id + "'>" + operation + "</td>");
                     $("#msgPatient").append("</tr>");
                 })
             }
         })
     }
 
-    function submitConvert(id, pid) {
-        var temp = $("input[name='temp']").val()
-        var sympton = $("input[name='sympton']").val()
-        var liveStatus = $("input[name='liveStatus']:checked").val()
-        var d = {
-            "code": 5,
-            "temp": temp,
-            "sympton": sympton,
-            "liveStatus": liveStatus,
-            "currentID": id,
-            "pid": pid,
-            csrfmiddlewaretoken: '{{ csrf_token }}'
-        }
-        var result = null;
-        $.ajax({
-            type: "POST",
-            url: "/wardNurse/",
-            data: d,
-            success: function (data) {
-            }
-        }).then(
-            function () {
-                flushPatient()
-                changeTo("patient")
-            }
-        )
-    }
 
     function logout() {
         location.href = "/service/?logout=0"
     }
+
 
 
 </script>

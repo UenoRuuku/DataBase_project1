@@ -25,7 +25,6 @@ from util import config
 
 def unpack(request):
     code = int(request.POST.get("code"))
-    print(code)
     log.info(str(request.session["username"]) + str(request.session["auth"]) + "访问了数据库")
     back_dic = ""
     id = int(request.session["id"])
@@ -95,7 +94,6 @@ def getAllPatient(id):
         "治疗中",
         "待转移"
     ]
-    print(back_list)
     for (a, b, c, d) in back_list:
         item = {"id": a, "name": b, "status": c + status[d + 1]}
         back_dic["data"].append(item)
@@ -151,7 +149,6 @@ def getExPatient(id, choose):
         "待转移"
     ]
     for (a, b, c, d) in back_list:
-        print(a, b, c, d)
         life = 0
         if c == "病亡":
             life = 1
@@ -173,7 +170,6 @@ def patientOut():
             }
         ]
     }
-    print(json.dumps(back_dic))
     return json.dumps(back_dic)
 
 
@@ -190,7 +186,6 @@ def moreOperation():
             }
         ]
     }
-    print(json.dumps(back_dic))
     return json.dumps(back_dic)
 
 
@@ -202,7 +197,6 @@ def getPatientByNurse(nurse):
         "msg": "success",
         "data": []
     }
-    print(back_list)
     for (a, b, c) in back_list:
         item = {"id": a, "name": b, "status": c}
         back_dic["data"].append(item)

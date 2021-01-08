@@ -1,3 +1,5 @@
+import time
+
 from django.shortcuts import render
 
 # Create your views here.
@@ -25,7 +27,6 @@ from util import config
 
 def unpack(request):
     code = int(request.POST.get("code"))
-    print(code)
     log.info(str(request.session["username"]) + str(request.session["auth"]) + "访问了数据库")
     back_dic = ""
     id = int(request.session["id"])
@@ -41,17 +42,35 @@ def unpack(request):
         back_dic = getExPatient(id, choose)
     elif code == 5:
         pid = request.POST.get("pid")
-        
-        back_dic = updateNat()
-    elif code == 6:
-        back_dic = moreOperation()
-    elif code == 7:
-        nurse = request.POST.get("nurse")
-        back_dic = getPatientByNurse(nurse)
-    elif code == 8:
-        nurse = request.POST.get("nurse")
-        back_dic = nurseDelete(id, nurse)
+        temp = request.POST.get("temp")
+        sympton = request.POST.get("sympton")
+        liveStatus = request.POST.get("liveStatus")
+        cur_id = request.POST.get("currentID")
+        back_dic = updateNat(pid, temp, sympton, liveStatus, cur_id)
     return HttpResponse(json.dumps(back_dic))
+
+
+def updateNat(pid, temp, sympton, liveStatus, cur_id):
+    log.info("更新" + pid + "核酸检测单")
+    status = [
+        "在院治疗",
+        "病亡"
+    ]
+    back_dic = {
+        "code": "1",
+        "msg": "success",
+        "data": []
+    }
+    year = time.localtime().tm_year
+    month = time.localtime().tm_mon
+    day = time.localtime().tm_mday
+
+    hour = time.localtime().tm_hour
+    minute = time.localtime().tm_min
+    second = time.localtime().tm_sec
+    time_str = str(year) + "-" + str(month) + "-" + str(day) + " " + str(hour) + ":" + str(minute) + ":" + str(second)
+    record_patient_status(time_str, float(temp), sympton, status[int(liveStatus)], int(cur_id), int(pid))
+    return json.dumps(back_dic)
 
 
 def getAllPatient(id):
@@ -72,7 +91,7 @@ def getAllPatient(id):
         life = 0
         if c == "病亡":
             life = 1
-        item = {"id": a, "name": b, "status": c + status[d + 1], "life": life}
+        item = {"id": a, "name": b, "status": c + "," + status[d + 1], "life": life}
         back_dic["data"].append(item)
     return json.dumps(back_dic)
 
@@ -108,7 +127,6 @@ def getExPatient(id, choose):
         "待转移"
     ]
     for (a, b, c, d) in back_list:
-        print(a, b, c, d)
         life = 0
         if c == "病亡":
             life = 1
