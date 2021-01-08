@@ -94,66 +94,48 @@ def nurse_master_query_patient(nurse_master_id, query_type):
     3：可出院的病人 4：不可出院的病人 5：待转入其他区域的病人 6：不需转入其他区域的病人
     :return: 满足筛选条件的所有病人的元组
     """
+    all_patient = []
     cursor.execute("select p_id from sickbed_patient natural join sickbed natural join ward,"
                    "treatment_area where ward_area=ta_id and area_nurse_master=%d" % nurse_master_id)
-    all_patient = cursor.fetchall()
+    temp = cursor.fetchall()
+    for p_id in temp:
+        cursor.execute("select patient.p_id,name,life_status,transfer "
+                       "from patient left join patient_status on patient.p_id=patient_status.p_id "
+                       "where patient.p_id=%d order by time desc" % p_id)
+        result = cursor.fetchall()
+        if len(result) != 0:
+            all_patient.append(result[0])
     info_to_query = []
     if query_type == -1:
-        for p_id in all_patient:
-            cursor.execute("select patient.p_id,name,life_status,transfer "
-                           "from patient left join patient_status on patient.p_id=patient_status.p_id "
-                           "where patient.p_id=%d order by time desc" % p_id)
-            result = cursor.fetchall()
-            if len(result) != 0:
-                info_to_query.append(result[0])
+        info_to_query = all_patient
     elif query_type == 0:
-        for p_id in all_patient:
-            cursor.execute("select patient.p_id,name,life_status "
-                           "from patient left join patient_status on patient.p_id=patient_status.p_id "
-                           "where patient.p_id=%d order by time desc" % p_id)
-            result = cursor.fetchall()
-            if len(result) != 0 and result[0][2] == '康复出院':
-                info_to_query.append(result[0])
+        for item in all_patient:
+            if item[2] == '康复出院':
+                info_to_query.append(item)
     elif query_type == 1:
-        for p_id in all_patient:
-            cursor.execute("select patient.p_id,name,life_status "
-                           "from patient left join patient_status on patient.p_id=patient_status.p_id "
-                           "where patient.p_id=%d order by time desc" % p_id)
-            result = cursor.fetchall()
-            if len(result) != 0 and result[0][2] == '在院治疗':
-                info_to_query.append(result[0])
+        for item in all_patient:
+            if item[2] == '在院治疗':
+                info_to_query.append(item)
     elif query_type == 2:
-        for p_id in all_patient:
-            cursor.execute("select patient.p_id,name,life_status "
-                           "from patient left join patient_status on patient.p_id=patient_status.p_id "
-                           "where patient.p_id=%d order by time desc" % p_id)
-            result = cursor.fetchall()
-            if len(result) != 0 and result[0][2] == '病亡':
-                info_to_query.append(result[0])
+        for item in all_patient:
+            if item[2] == '病亡':
+                info_to_query.append(item)
     elif query_type == 3:
-        for p_id in all_patient:
-            cursor.execute("select p_id,name,transfer from patient where p_id=%d and transfer=-1" % p_id)
-            result = cursor.fetchall()
-            if len(result) != 0:
-                info_to_query.append(result[0])
+        for item in all_patient:
+            if item[3] == -1:
+                info_to_query.append(item)
     elif query_type == 4:
-        for p_id in all_patient:
-            cursor.execute("select p_id,name,transfer from patient where p_id=%d and transfer<>-1" % p_id)
-            result = cursor.fetchall()
-            if len(result) != 0:
-                info_to_query.append(result[0])
+        for item in all_patient:
+            if item[3] != -1:
+                info_to_query.append(item)
     elif query_type == 5:
-        for p_id in all_patient:
-            cursor.execute("select p_id,name,transfer from patient where p_id=%d and transfer=1" % p_id)
-            result = cursor.fetchall()
-            if len(result) != 0:
-                info_to_query.append(result[0])
+        for item in all_patient:
+            if item[3] == 1:
+                info_to_query.append(item)
     elif query_type == 6:
-        for p_id in all_patient:
-            cursor.execute("select p_id,name,transfer from patient where p_id=%d and transfer<>1" % p_id)
-            result = cursor.fetchall()
-            if len(result) != 0:
-                info_to_query.append(result[0])
+        for item in all_patient:
+            if item[3] != 1:
+                info_to_query.append(item)
     return info_to_query
 
 
