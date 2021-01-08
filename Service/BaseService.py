@@ -9,6 +9,20 @@ def insert_user(username, password, name, user_type):
                    " values ('%s', '%s', '%s', '%s')" % (username, password, name, user_type))
 
 
+def login(username, password):
+    """
+    :param username: 登录的用户名
+    :param password: 登录的密码
+    :return: 登录密码是否与数据库相符
+    """
+    cursor.execute("select password from user where username='%s'" % username)
+    result = cursor.fetchall()
+    if len(result) != 0 and result[0][0] == password:
+        return True
+    else:
+        return False
+
+
 def find_available_sickbed_and_nurse(illness_level):
     # 寻找对应治疗区域
     area_id = []
@@ -70,7 +84,9 @@ def check_patient_discharge(p_id):
     latest_time = None
     nat_pass = False
     for item in result:
-        if item[0] == '阴性' and item[2] == '轻症':
+        if item[0] != '阴性' or item[2] != '轻症':
+            break
+        else:
             if latest_time is None:
                 latest_time = item[1]
             elif (latest_time - item[1]).total_seconds() >= 86400:

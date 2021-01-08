@@ -110,3 +110,13 @@
 2021-01-07 17:18:54,922 - INFO - 获取所有可以出院的病人
 2021-01-07 17:19:55,625 - INFO - 183020100130访问了数据库
 2021-01-07 17:19:55,625 - INFO - 获取所有可以出院的病人
+2021-01-08 10:50:09,736 - INFO - ----------------------------
+2021-01-08 10:50:09,736 - INFO - start initializing.
+2021-01-08 10:50:09,797 - INFO - read sql
+2021-01-08 10:50:09,920 - INFO - database hospital initialized successfully.
+2021-01-08 10:50:09,920 - INFO - start insert data.
+2021-01-08 10:50:09,920 - INFO - insert users.
+2021-01-08 10:50:09,926 - INFO - insert treatment areas.
+2021-01-08 10:50:09,932 - INFO - insert sickbed and ward.
+2021-01-08 10:50:09,941 - INFO - finish inserting data.
+2021-01-08 10:50:09,941 - INFO - ----------------------------

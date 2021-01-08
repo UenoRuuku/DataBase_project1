@@ -90,9 +90,11 @@ def update_patient_life_status(life_status, p_id):
             cursor.execute("update sickbed set bed_status=0 where b_id=%d" % sickbed_id)
             cursor.execute("delete from sickbed_patient where b_id=%d" % sickbed_id)
 
-            cursor.execute("select illness_level from nat_report where p_id=%d order by time desc" % p_id)
+            cursor.execute("select area_type from ward natural join sickbed, treatment_area "
+                           "where ward_area=ta_id and b_id=%d" % sickbed_id)
             result = cursor.fetchall()
-            transfer_patient(result[0][0])
+            if len(result) != 0:
+                transfer_patient(result[0][0][:-4])
         db.commit()
         return 1
 
