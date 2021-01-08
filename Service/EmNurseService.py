@@ -88,13 +88,12 @@ def em_nurse_query_patient(area_type, query_type):
                        "treatment_area where ward_area=ta_id and area_type='%s'" % area_type)
         all_patient = cursor.fetchall()
         if query_type == 1:
-            for p_id in all_patient:
-                cursor.execute("select patient.p_id,name,life_status "
-                               "from patient left join patient_status on patient.p_id=patient_status.p_id "
-                               "where patient.p_id=%d order by time desc" % p_id)
-                result = cursor.fetchall()
-                if len(result) != 0 and result[0][2] == '康复出院':
-                    info_to_query.append(result[0])
+            cursor.execute("select p_id,name,life_status,transfer "
+                           "from patient natural join patient_status "
+                           "where life_status='%s'" % '康复出院')
+            result = cursor.fetchall()
+            for item in result:
+                info_to_query.append(item)
         elif query_type == 2:
             for p_id in all_patient:
                 cursor.execute("select patient.p_id,name,life_status "
@@ -104,13 +103,12 @@ def em_nurse_query_patient(area_type, query_type):
                 if len(result) != 0 and result[0][2] == '在院治疗':
                     info_to_query.append(result[0])
         elif query_type == 3:
-            for p_id in all_patient:
-                cursor.execute("select patient.p_id,name,life_status "
-                               "from patient left join patient_status on patient.p_id=patient_status.p_id "
-                               "where patient.p_id=%d order by time desc" % p_id)
-                result = cursor.fetchall()
-                if len(result) != 0 and result[0][2] == '病亡':
-                    info_to_query.append(result[0])
+            cursor.execute("select p_id,name,life_status,transfer "
+                           "from patient natural join patient_status "
+                           "where life_status='%s'" % '病亡')
+            result = cursor.fetchall()
+            for item in result:
+                info_to_query.append(item)
         elif query_type == 4:
             for p_id in all_patient:
                 cursor.execute("select p_id,name,illness_level from patient natural join nat_report "

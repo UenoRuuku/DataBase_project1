@@ -109,17 +109,23 @@ def nurse_master_query_patient(nurse_master_id, query_type):
     if query_type == -1:
         info_to_query = all_patient
     elif query_type == 0:
-        for item in all_patient:
-            if item[2] == '康复出院':
-                info_to_query.append(item)
+        cursor.execute("select p_id,name,life_status,transfer "
+                       "from patient natural join patient_status "
+                       "where life_status='%s'" % '康复出院')
+        result = cursor.fetchall()
+        for item in result:
+            info_to_query.append(item)
     elif query_type == 1:
         for item in all_patient:
             if item[2] == '在院治疗':
                 info_to_query.append(item)
     elif query_type == 2:
-        for item in all_patient:
-            if item[2] == '病亡':
-                info_to_query.append(item)
+        cursor.execute("select p_id,name,life_status,transfer "
+                       "from patient natural join patient_status "
+                       "where life_status='%s'" % '病亡')
+        result = cursor.fetchall()
+        for item in result:
+            info_to_query.append(item)
     elif query_type == 3:
         for item in all_patient:
             if item[3] == -1:
